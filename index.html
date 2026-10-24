@@ -2048,7 +2048,7 @@
     const groundDecals = [];
 
     function addGroundDecal(x, y, radius, type) {
-        if (groundDecals.length > 60) groundDecals.shift();
+        if (groundDecals.length > 40) groundDecals.shift();
         groundDecals.push({
             x, y, radius, type,
             life: 600, maxLife: 600,
@@ -2065,7 +2065,15 @@
     }
 
     function drawGroundDecals(ctx) {
+        const camL = camera.x - 80;
+        const camR = camera.x + VIEW_WIDTH + 80;
+        const camT = camera.y - 80;
+        const camB = camera.y + VIEW_HEIGHT + 80;
+
         for (const d of groundDecals) {
+            if (d.x + d.radius < camL || d.x - d.radius > camR || d.y + d.radius < camT || d.y - d.radius > camB) {
+                continue;
+            }
             const alpha = Math.min(1, d.life / 60) * 0.75;
             ctx.save();
             ctx.translate(d.x, d.y);
@@ -5807,13 +5815,18 @@
         }
     }
 
-    // --- 초대형 포켓몬 리그 공식 스타디움 전면 필드 드로잉 (3000 x 1900 월드) ---
-    function drawPokemonStadium(ctx) {
-        ctx.save();
+    // --- 초대형 포켓몬 리그 공식 스타디움 오프스크린 캔버스 캐싱 (GPU 하드웨어 가속 60fps) ---
+    let stadiumBgCanvas = null;
+
+    function renderStadiumToOffscreen() {
+        stadiumBgCanvas = document.createElement('canvas');
+        stadiumBgCanvas.width = WORLD_WIDTH;
+        stadiumBgCanvas.height = WORLD_HEIGHT;
+        const bCtx = stadiumBgCanvas.getContext('2d');
 
         // 1. 경기장 바깥 어두운 관람석 베이스
-        ctx.fillStyle = '#080d15';
-        ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+        bCtx.fillStyle = '#080d15';
+        bCtx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
         // 2. 상단 및 측면 관람석
         const bleacherRows = [
@@ -5823,45 +5836,43 @@
             { y: 108, h: 34, color: '#273856' }
         ];
         for (const row of bleacherRows) {
-            ctx.fillStyle = row.color;
-            ctx.fillRect(0, row.y, WORLD_WIDTH, row.h);
+            bCtx.fillStyle = row.color;
+            bCtx.fillRect(0, row.y, WORLD_WIDTH, row.h);
         }
 
         // 응원하는 열광적인 관중 픽셀 도트
         const crowdColors = ['#ff5252', '#448aff', '#ffd740', '#69f0ae', '#e040fb', '#ffffff', '#ffab40', '#00e5ff'];
-        const crowdAnim = Math.sin(Date.now() * 0.006);
         for (let x = 20; x < WORLD_WIDTH - 20; x += 16) {
             for (let r = 0; r < 4; r++) {
                 const seed = (x * 17 + r * 31) % crowdColors.length;
-                const bob = ((x + r * 7) % 3 === 0) ? crowdAnim * 2.5 : 0;
-                ctx.fillStyle = crowdColors[seed];
-                ctx.fillRect(x, 6 + r * 32 + bob, 7, 7);
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-                ctx.fillRect(x + 1, 14 + r * 32 + bob, 5, 8);
+                bCtx.fillStyle = crowdColors[seed];
+                bCtx.fillRect(x, 6 + r * 32, 7, 7);
+                bCtx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+                bCtx.fillRect(x + 1, 14 + r * 32, 5, 8);
             }
         }
 
         // 3. 스타디움 외곽 석조 방벽 테두리
-        ctx.fillStyle = '#222c3d';
-        ctx.fillRect(130, 142, WORLD_WIDTH - 260, WORLD_HEIGHT - 284);
-        ctx.strokeStyle = '#41526d';
-        ctx.lineWidth = 8;
-        ctx.strokeRect(130, 142, WORLD_WIDTH - 260, WORLD_HEIGHT - 284);
+        bCtx.fillStyle = '#222c3d';
+        bCtx.fillRect(130, 142, WORLD_WIDTH - 260, WORLD_HEIGHT - 284);
+        bCtx.strokeStyle = '#41526d';
+        bCtx.lineWidth = 8;
+        bCtx.strokeRect(130, 142, WORLD_WIDTH - 260, WORLD_HEIGHT - 284);
 
         // 상단 방벽 공식 챔피언십 엠블럼 띠
-        ctx.fillStyle = '#18212f';
-        ctx.fillRect(130, 142, WORLD_WIDTH - 260, 26);
-        ctx.fillStyle = '#fbc02d';
-        ctx.font = '900 13px "Press Start 2P", monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText('★ POKÉMON LEAGUE OFFICIAL CHAMPIONSHIP ARENA ★', CENTER_X, 160);
+        bCtx.fillStyle = '#18212f';
+        bCtx.fillRect(130, 142, WORLD_WIDTH - 260, 26);
+        bCtx.fillStyle = '#fbc02d';
+        bCtx.font = '900 13px "Press Start 2P", monospace';
+        bCtx.textAlign = 'center';
+        bCtx.fillText('★ POKÉMON LEAGUE OFFICIAL CHAMPIONSHIP ARENA ★', CENTER_X, 160);
 
         // 4. 내부 흙/모래 트랙 띠
-        ctx.fillStyle = '#b3823e';
-        ctx.fillRect(165, 172, WORLD_WIDTH - 330, WORLD_HEIGHT - 344);
-        ctx.strokeStyle = '#8d6326';
-        ctx.lineWidth = 5;
-        ctx.strokeRect(165, 172, WORLD_WIDTH - 330, WORLD_HEIGHT - 344);
+        bCtx.fillStyle = '#b3823e';
+        bCtx.fillRect(165, 172, WORLD_WIDTH - 330, WORLD_HEIGHT - 344);
+        bCtx.strokeStyle = '#8d6326';
+        bCtx.lineWidth = 5;
+        bCtx.strokeRect(165, 172, WORLD_WIDTH - 330, WORLD_HEIGHT - 344);
 
         // 5. 메인 천연 잔디 배틀 피치
         const pitchX = PITCH_X;
@@ -5869,113 +5880,109 @@
         const pitchW = PITCH_W;
         const pitchH = PITCH_H;
 
-        const grassGrad = ctx.createRadialGradient(CENTER_X, CENTER_Y, 150, CENTER_X, CENTER_Y, 1400);
+        const grassGrad = bCtx.createRadialGradient(CENTER_X, CENTER_Y, 150, CENTER_X, CENTER_Y, 1400);
         grassGrad.addColorStop(0, '#388e3c');
         grassGrad.addColorStop(0.65, '#2e7d32');
         grassGrad.addColorStop(1, '#1b5e20');
-        ctx.fillStyle = grassGrad;
-        ctx.fillRect(pitchX, pitchY, pitchW, pitchH);
+        bCtx.fillStyle = grassGrad;
+        bCtx.fillRect(pitchX, pitchY, pitchW, pitchH);
 
         // 잔디 스트라이프 패턴
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(pitchX, pitchY, pitchW, pitchH);
-        ctx.clip();
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+        bCtx.save();
+        bCtx.beginPath();
+        bCtx.rect(pitchX, pitchY, pitchW, pitchH);
+        bCtx.clip();
+        bCtx.fillStyle = 'rgba(255, 255, 255, 0.05)';
         for (let x = pitchX; x < pitchX + pitchW; x += 100) {
-            ctx.fillRect(x, pitchY, 50, pitchH);
+            bCtx.fillRect(x, pitchY, 50, pitchH);
         }
-
-        // 지형 데칼 (Scorch, Water, Crater, Skid, Sludge)
-        drawGroundDecals(ctx);
+        bCtx.restore();
 
         // 6. 공식 규격 코트 흰색 라인
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
-        ctx.lineWidth = 4;
-        ctx.strokeRect(pitchX + 40, pitchY + 40, pitchW - 80, pitchH - 80);
+        bCtx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
+        bCtx.lineWidth = 4;
+        bCtx.strokeRect(pitchX + 40, pitchY + 40, pitchW - 80, pitchH - 80);
 
         // 중앙 분할선
-        ctx.beginPath();
-        ctx.moveTo(CENTER_X, pitchY + 40);
-        ctx.lineTo(CENTER_X, pitchY + pitchH - 40);
-        ctx.stroke();
+        bCtx.beginPath();
+        bCtx.moveTo(CENTER_X, pitchY + 40);
+        bCtx.lineTo(CENTER_X, pitchY + pitchH - 40);
+        bCtx.stroke();
 
         // 중앙 대형 서클
-        ctx.beginPath();
-        ctx.arc(CENTER_X, CENTER_Y, 200, 0, Math.PI * 2);
-        ctx.stroke();
+        bCtx.beginPath();
+        bCtx.arc(CENTER_X, CENTER_Y, 200, 0, Math.PI * 2);
+        bCtx.stroke();
 
         // 7. 트레이너 스타트 박스 (1P 레드 / 2P 블루)
-        ctx.fillStyle = 'rgba(244, 67, 54, 0.22)';
-        ctx.strokeStyle = 'rgba(244, 67, 54, 0.85)';
-        ctx.lineWidth = 3;
-        ctx.fillRect(pitchX + 60, CENTER_Y - 120, 140, 240);
-        ctx.strokeRect(pitchX + 60, CENTER_Y - 120, 140, 240);
-        ctx.fillStyle = '#ff8a80';
-        ctx.font = '900 16px "Press Start 2P", monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText('1P', pitchX + 130, CENTER_Y + 8);
+        bCtx.fillStyle = 'rgba(244, 67, 54, 0.22)';
+        bCtx.strokeStyle = 'rgba(244, 67, 54, 0.85)';
+        bCtx.lineWidth = 3;
+        bCtx.fillRect(pitchX + 60, CENTER_Y - 120, 140, 240);
+        bCtx.strokeRect(pitchX + 60, CENTER_Y - 120, 140, 240);
+        bCtx.fillStyle = '#ff8a80';
+        bCtx.font = '900 16px "Press Start 2P", monospace';
+        bCtx.textAlign = 'center';
+        bCtx.fillText('1P', pitchX + 130, CENTER_Y + 8);
 
-        ctx.fillStyle = 'rgba(33, 150, 243, 0.22)';
-        ctx.strokeStyle = 'rgba(33, 150, 243, 0.85)';
-        ctx.lineWidth = 3;
-        ctx.fillRect(pitchX + pitchW - 200, CENTER_Y - 120, 140, 240);
-        ctx.strokeRect(pitchX + pitchW - 200, CENTER_Y - 120, 140, 240);
-        ctx.fillStyle = '#82b1ff';
-        ctx.font = '900 16px "Press Start 2P", monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText('2P', pitchX + pitchW - 130, CENTER_Y + 8);
-
-        ctx.restore();
+        bCtx.fillStyle = 'rgba(33, 150, 243, 0.22)';
+        bCtx.strokeStyle = 'rgba(33, 150, 243, 0.85)';
+        bCtx.lineWidth = 3;
+        bCtx.fillRect(pitchX + pitchW - 200, CENTER_Y - 120, 140, 240);
+        bCtx.strokeRect(pitchX + pitchW - 200, CENTER_Y - 120, 140, 240);
+        bCtx.fillStyle = '#82b1ff';
+        bCtx.font = '900 16px "Press Start 2P", monospace';
+        bCtx.textAlign = 'center';
+        bCtx.fillText('2P', pitchX + pitchW - 130, CENTER_Y + 8);
 
         // 8. 중앙 몬스터볼 문양
-        ctx.save();
+        bCtx.save();
         const pbRadius = 130;
-        ctx.beginPath();
-        ctx.arc(CENTER_X, CENTER_Y, pbRadius, Math.PI, 0);
-        ctx.fillStyle = '#d32f2f';
-        ctx.fill();
+        bCtx.beginPath();
+        bCtx.arc(CENTER_X, CENTER_Y, pbRadius, Math.PI, 0);
+        bCtx.fillStyle = '#d32f2f';
+        bCtx.fill();
 
-        ctx.beginPath();
-        ctx.arc(CENTER_X, CENTER_Y, pbRadius * 0.72, Math.PI * 1.1, Math.PI * 1.45);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
-        ctx.lineWidth = 8;
-        ctx.stroke();
+        bCtx.beginPath();
+        bCtx.arc(CENTER_X, CENTER_Y, pbRadius * 0.72, Math.PI * 1.1, Math.PI * 1.45);
+        bCtx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+        bCtx.lineWidth = 8;
+        bCtx.stroke();
 
-        ctx.beginPath();
-        ctx.arc(CENTER_X, CENTER_Y, pbRadius, 0, Math.PI);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
+        bCtx.beginPath();
+        bCtx.arc(CENTER_X, CENTER_Y, pbRadius, 0, Math.PI);
+        bCtx.fillStyle = '#ffffff';
+        bCtx.fill();
 
-        ctx.fillStyle = '#1e272e';
-        ctx.fillRect(CENTER_X - pbRadius, CENTER_Y - 12, pbRadius * 2, 24);
+        bCtx.fillStyle = '#1e272e';
+        bCtx.fillRect(CENTER_X - pbRadius, CENTER_Y - 12, pbRadius * 2, 24);
 
-        ctx.strokeStyle = '#1e272e';
-        ctx.lineWidth = 8;
-        ctx.beginPath();
-        ctx.arc(CENTER_X, CENTER_Y, pbRadius, 0, Math.PI * 2);
-        ctx.stroke();
+        bCtx.strokeStyle = '#1e272e';
+        bCtx.lineWidth = 8;
+        bCtx.beginPath();
+        bCtx.arc(CENTER_X, CENTER_Y, pbRadius, 0, Math.PI * 2);
+        bCtx.stroke();
 
-        ctx.beginPath();
-        ctx.arc(CENTER_X, CENTER_Y, 38, 0, Math.PI * 2);
-        ctx.fillStyle = '#f5f6fa';
-        ctx.fill();
-        ctx.strokeStyle = '#1e272e';
-        ctx.lineWidth = 7;
-        ctx.stroke();
+        bCtx.beginPath();
+        bCtx.arc(CENTER_X, CENTER_Y, 38, 0, Math.PI * 2);
+        bCtx.fillStyle = '#f5f6fa';
+        bCtx.fill();
+        bCtx.strokeStyle = '#1e272e';
+        bCtx.lineWidth = 7;
+        bCtx.stroke();
 
-        ctx.beginPath();
-        ctx.arc(CENTER_X, CENTER_Y, 18, 0, Math.PI * 2);
-        ctx.fillStyle = '#eceff1';
-        ctx.fill();
-        ctx.strokeStyle = '#90a4ae';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-        ctx.restore();
+        bCtx.beginPath();
+        bCtx.arc(CENTER_X, CENTER_Y, 18, 0, Math.PI * 2);
+        bCtx.fillStyle = '#eceff1';
+        bCtx.fill();
+        bCtx.strokeStyle = '#90a4ae';
+        bCtx.lineWidth = 3;
+        bCtx.stroke();
+        bCtx.restore();
 
-        // 9. 코너 4개소 스타디움 조명 빛줄기
-        ctx.save();
-        ctx.globalCompositeOperation = 'lighter';
+        // 9. 코너 4개소 스타디움 조명 빛줄기 (사전 베이킹)
+        bCtx.save();
+        bCtx.globalCompositeOperation = 'lighter';
         const corners = [
             { x: pitchX, y: pitchY },
             { x: pitchX + pitchW, y: pitchY },
@@ -5983,18 +5990,25 @@
             { x: pitchX + pitchW, y: pitchY + pitchH }
         ];
         for (const c of corners) {
-            const grad = ctx.createRadialGradient(c.x, c.y, 40, c.x, c.y, 650);
+            const grad = bCtx.createRadialGradient(c.x, c.y, 40, c.x, c.y, 650);
             grad.addColorStop(0, 'rgba(255, 255, 255, 0.18)');
             grad.addColorStop(0.5, 'rgba(255, 245, 200, 0.05)');
             grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(c.x, c.y, 650, 0, Math.PI * 2);
-            ctx.fill();
+            bCtx.fillStyle = grad;
+            bCtx.beginPath();
+            bCtx.arc(c.x, c.y, 650, 0, Math.PI * 2);
+            bCtx.fill();
         }
-        ctx.restore();
+        bCtx.restore();
+    }
 
-        ctx.restore();
+    function drawPokemonStadium(ctx) {
+        if (!stadiumBgCanvas) renderStadiumToOffscreen();
+        // 사전 렌더링된 스타디움 캔버스를 단 1회 drawImage로 초고속 복사!
+        ctx.drawImage(stadiumBgCanvas, 0, 0);
+
+        // 지형 데칼만 동적으로 렌더링
+        drawGroundDecals(ctx);
     }
 
     // --- 화면 밖 적 방향 화살표 인디케이터 (오프스크린 인디케이터) ---
@@ -6820,36 +6834,62 @@
         if (btnP2) btnP2.innerText = `🔄 적 교체 (${p2.name})`;
     }
 
+    // HUD DOM 엘리먼트 캐싱 (초당 수천 번의 DOM 탐색 방지)
+    const hudDom = {
+        p1HpFill: document.getElementById('p1-hp-fill'),
+        p1HpText: document.getElementById('p1-hp-text'),
+        p1StaminaFill: document.getElementById('p1-stamina-fill'),
+        p2HpFill: document.getElementById('p2-hp-fill'),
+        p2HpText: document.getElementById('p2-hp-text'),
+        p2StaminaFill: document.getElementById('p2-stamina-fill'),
+        iconAttack: document.getElementById('icon-attack'),
+        nameAttack: document.getElementById('name-attack'),
+        iconE: document.getElementById('icon-e'),
+        nameE: document.getElementById('name-e'),
+        iconF: document.getElementById('icon-f'),
+        nameF: document.getElementById('name-f'),
+        cd: {
+            attack: document.getElementById('cd-attack'),
+            q: document.getElementById('cd-q'),
+            e: document.getElementById('cd-e'),
+            r: document.getElementById('cd-r'),
+            f: document.getElementById('cd-f')
+        }
+    };
+
     function renderHUD() {
         const p1Pct = (p1.hp / p1.maxHp) * 100;
-        const p1Fill = document.getElementById('p1-hp-fill');
-        p1Fill.style.width = `${p1Pct}%`;
-        p1Fill.className = `hp-inner ${p1Pct < 25 ? 'red' : (p1Pct < 55 ? 'yellow' : '')}`;
-        document.getElementById('p1-hp-text').innerText = `${Math.ceil(p1.hp)} / ${p1.maxHp}`;
-        document.getElementById('p1-stamina-fill').style.width = `${(p1.stamina / p1.maxStamina) * 100}%`;
+        if (hudDom.p1HpFill) {
+            hudDom.p1HpFill.style.width = `${p1Pct}%`;
+            hudDom.p1HpFill.className = `hp-inner ${p1Pct < 25 ? 'red' : (p1Pct < 55 ? 'yellow' : '')}`;
+        }
+        if (hudDom.p1HpText) hudDom.p1HpText.innerText = `${Math.ceil(p1.hp)} / ${p1.maxHp}`;
+        if (hudDom.p1StaminaFill) hudDom.p1StaminaFill.style.width = `${(p1.stamina / p1.maxStamina) * 100}%`;
 
         const p2Pct = (p2.hp / p2.maxHp) * 100;
-        const p2Fill = document.getElementById('p2-hp-fill');
-        p2Fill.style.width = `${p2Pct}%`;
-        p2Fill.className = `hp-inner ${p2Pct < 25 ? 'red' : (p2Pct < 55 ? 'yellow' : '')}`;
-        document.getElementById('p2-hp-text').innerText = `${Math.ceil(p2.hp)} / ${p2.maxHp}`;
-        document.getElementById('p2-stamina-fill').style.width = `${(p2.stamina / p2.maxStamina) * 100}%`;
+        if (hudDom.p2HpFill) {
+            hudDom.p2HpFill.style.width = `${p2Pct}%`;
+            hudDom.p2HpFill.className = `hp-inner ${p2Pct < 25 ? 'red' : (p2Pct < 55 ? 'yellow' : '')}`;
+        }
+        if (hudDom.p2HpText) hudDom.p2HpText.innerText = `${Math.ceil(p2.hp)} / ${p2.maxHp}`;
+        if (hudDom.p2StaminaFill) hudDom.p2StaminaFill.style.width = `${(p2.stamina / p2.maxStamina) * 100}%`;
 
         // 루카리오 실시간 스킬 슬롯 명칭 갱신
         if (p1.species === 'lucario') {
             const isBuffed = (p1.boneRushBuffTimer > 0);
             const hasAnchor = !!p1.boneRushAnchor;
-            document.getElementById('icon-attack').innerText = isBuffed ? '🦴' : '🥊';
-            document.getElementById('name-attack').innerText = isBuffed ? '본러시 강타' : '불릿펀치';
-            document.getElementById('icon-e').innerText = isBuffed ? '💥' : '⚡';
-            document.getElementById('name-e').innerText = isBuffed ? '강화 신속' : '신속';
-            document.getElementById('icon-f').innerText = hasAnchor ? '📍' : '🦴';
-            document.getElementById('name-f').innerText = hasAnchor ? '순간이동 강타' : '본러시';
+            if (hudDom.iconAttack) hudDom.iconAttack.innerText = isBuffed ? '🦴' : '🥊';
+            if (hudDom.nameAttack) hudDom.nameAttack.innerText = isBuffed ? '본러시 강타' : '불릿펀치';
+            if (hudDom.iconE) hudDom.iconE.innerText = isBuffed ? '💥' : '⚡';
+            if (hudDom.nameE) hudDom.nameE.innerText = isBuffed ? '강화 신속' : '신속';
+            if (hudDom.iconF) hudDom.iconF.innerText = hasAnchor ? '📍' : '🦴';
+            if (hudDom.nameF) hudDom.nameF.innerText = hasAnchor ? '순간이동 강타' : '본러시';
         }
 
         const slots = ['attack', 'q', 'e', 'r', 'f'];
         for (const slot of slots) {
-            const cdEl = document.getElementById(`cd-${slot}`);
+            const cdEl = hudDom.cd[slot];
+            if (!cdEl) continue;
             // 루카리오 본러시 뼈다귀가 박혀있는 동안에는 F키 즉시 2타 시전 가능
             if (p1.species === 'lucario' && slot === 'f' && p1.boneRushAnchor) {
                 cdEl.classList.remove('on-cd');
@@ -6914,6 +6954,14 @@
                 dt.update();
                 if (dt.life <= 0) damageTexts.splice(i, 1);
             }
+
+            // 파티클 & 데미지 텍스트 상한선 관리 (극심한 난전 중 프레임 드랍 원천 차단)
+            if (particles.length > 200) {
+                particles.splice(0, particles.length - 200);
+            }
+            if (damageTexts.length > 35) {
+                damageTexts.splice(0, damageTexts.length - 35);
+            }
         }
 
         mouse.x = screenMouse.x + camera.x;
@@ -6932,31 +6980,53 @@
 
         ctx.clearRect(0, 0, VIEW_WIDTH, VIEW_HEIGHT);
 
+        // 뷰포트 컬링 바운드 계산
+        const camL = camera.x - 70;
+        const camR = camera.x + VIEW_WIDTH + 70;
+        const camT = camera.y - 70;
+        const camB = camera.y + VIEW_HEIGHT + 70;
+
         // === 월드 공간 렌더링 ===
         ctx.save();
         ctx.translate(-camera.x + shakeOffsetX, -camera.y + shakeOffsetY);
 
-        // 1. 경기장
+        // 1. 경기장 (단 1회 drawImage 복사)
         drawPokemonStadium(ctx);
 
-        // 2. 바닥 장판
-        for (const gf of groundEffects) gf.draw(ctx);
+        // 2. 바닥 장판 (화면 뷰포트 내 장판만 렌더링)
+        for (const gf of groundEffects) {
+            if (gf.x + 200 >= camL && gf.x - 200 <= camR && gf.y + 200 >= camT && gf.y - 200 <= camB) {
+                gf.draw(ctx);
+            }
+        }
 
-        // 3. 투사체
-        for (const proj of projectiles) proj.draw(ctx);
+        // 3. 투사체 (화면 뷰포트 내 투사체만 렌더링)
+        for (const proj of projectiles) {
+            if (proj.x >= camL - 40 && proj.x <= camR + 40 && proj.y >= camT - 40 && proj.y <= camB + 40) {
+                proj.draw(ctx);
+            }
+        }
 
         // 4. 캐릭터 및 분신 (Y좌표 정렬)
         const renderList = [p1, p2, ...scytherClones].sort((a, b) => a.y - b.y);
         for (const char of renderList) char.draw(ctx);
 
-        // 5. 파티클
+        // 5. 파티클 (화면 뷰포트 내 파티클만 렌더링)
         ctx.save();
         ctx.globalCompositeOperation = 'lighter';
-        for (const pt of particles) pt.draw(ctx);
+        for (const pt of particles) {
+            if (pt.x >= camL && pt.x <= camR && pt.y >= camT && pt.y <= camB) {
+                pt.draw(ctx);
+            }
+        }
         ctx.restore();
 
-        // 6. 데미지 텍스트
-        for (const dt of damageTexts) dt.draw(ctx);
+        // 6. 데미지 텍스트 (화면 뷰포트 내 텍스트만 렌더링)
+        for (const dt of damageTexts) {
+            if (dt.x >= camL && dt.x <= camR && dt.y >= camT && dt.y <= camB) {
+                dt.draw(ctx);
+            }
+        }
 
         // 7. 조준선
         if (p1 && p1.isAlive) {
