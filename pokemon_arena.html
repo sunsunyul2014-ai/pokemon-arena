@@ -3542,7 +3542,25 @@
                 this.stamina = Math.min(this.maxStamina, this.stamina + 0.45);
             }
 
-            if (this.state === 'stun' || this.stunTimer > 0) {
+            // 샌드백 모드 적(p2): 모든 공격/스킬/자체 이동 완전 차단 및 피격 넉백만 감속 처리
+            if (this !== p1 && currentDifficulty === 'sandbag') {
+                if (this.state === 'stun' || this.stunTimer > 0) {
+                    this.vx *= 0.8;
+                    this.vy *= 0.8;
+                    if (this.stunTimer <= 0) this.state = 'idle';
+                } else if (this.state === 'hurt' || this.state === 'knockdown') {
+                    this.vx *= 0.88;
+                    this.vy *= 0.88;
+                    this.stateTimer--;
+                    if (this.stateTimer <= 0) this.state = 'idle';
+                } else {
+                    this.vx *= 0.6;
+                    this.vy *= 0.6;
+                    if (Math.abs(this.vx) < 0.05) this.vx = 0;
+                    if (Math.abs(this.vy) < 0.05) this.vy = 0;
+                    this.state = 'idle';
+                }
+            } else if (this.state === 'stun' || this.stunTimer > 0) {
                 this.vx *= 0.8;
                 this.vy *= 0.8;
                 if (this.stunTimer <= 0) this.state = 'idle';
@@ -3593,11 +3611,17 @@
                 this.updateSolarBeamFire(opponent);
 
             } else {
-                if (this.isAI) {
+                if (this === p1) {
+                    this.updatePlayerMovement(currentBaseSpeed);
+                } else if (this.isAI && currentDifficulty !== 'sandbag') {
                     const aiTarget = this.getAITarget(opponent);
                     this.updateAI(aiTarget, currentBaseSpeed);
                 } else {
-                    this.updatePlayerMovement(currentBaseSpeed);
+                    this.vx *= 0.6;
+                    this.vy *= 0.6;
+                    if (Math.abs(this.vx) < 0.05) this.vx = 0;
+                    if (Math.abs(this.vy) < 0.05) this.vy = 0;
+                    this.state = 'idle';
                 }
             }
 
@@ -3610,14 +3634,13 @@
             if (this.y < FIELD_MIN_Y) { this.y = FIELD_MIN_Y; this.vy *= -0.3; }
             if (this.y > FIELD_MAX_Y) { this.y = FIELD_MAX_Y; this.vy *= -0.3; }
 
-            // 조준 방향 갱신 (솔라빔 차징 및 발사 중에는 방향 조절이 훨씬 더 느리게 서서히 회전!)
-            if (!this.isAI) {
+            // 조준 방향 갱신
+            if (this === p1) {
                 if (this.state === 'solarbeam_charge' || this.state === 'solarbeam_fire') {
                     const targetAngle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
                     let diff = targetAngle - this.aimAngle;
                     while (diff < -Math.PI) diff += Math.PI * 2;
                     while (diff > Math.PI) diff -= Math.PI * 2;
-                    // 발사 중 회전 속도 0.010으로 대폭 느리게 너프! (차징 중 0.022)
                     const turnRate = (this.state === 'solarbeam_fire') ? 0.010 : 0.022;
                     this.aimAngle += diff * turnRate;
                     this.facingLeft = (Math.cos(this.aimAngle) < 0);
@@ -3625,20 +3648,27 @@
                     this.aimAngle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
                     this.facingLeft = (mouse.x < this.x);
                 }
+            } else if (currentDifficulty === 'sandbag') {
+                // 샌드백 적은 플레이어를 마주보며 멈춰있음
+                if (opponent) {
+                    this.aimAngle = Math.atan2(opponent.y - this.y, opponent.x - this.x);
+                    this.facingLeft = (opponent.x < this.x);
+                }
             } else {
                 const targetObj = (this.aiFocusTarget && this.aiFocusTarget.isAlive) ? this.aiFocusTarget : opponent;
-                if (this.state === 'solarbeam_charge' || this.state === 'solarbeam_fire') {
-                    const targetAngle = Math.atan2(targetObj.y - this.y, targetObj.x - this.x);
-                    let diff = targetAngle - this.aimAngle;
-                    while (diff < -Math.PI) diff += Math.PI * 2;
-                    while (diff > Math.PI) diff -= Math.PI * 2;
-                    // 발사 중 회전 속도 0.010으로 대폭 느리게 너프! (차징 중 0.022)
-                    const turnRate = (this.state === 'solarbeam_fire') ? 0.010 : 0.022;
-                    this.aimAngle += diff * turnRate;
-                    this.facingLeft = (Math.cos(this.aimAngle) < 0);
-                } else {
-                    this.aimAngle = Math.atan2(targetObj.y - this.y, targetObj.x - this.x);
-                    this.facingLeft = (targetObj.x < this.x);
+                if (targetObj) {
+                    if (this.state === 'solarbeam_charge' || this.state === 'solarbeam_fire') {
+                        const targetAngle = Math.atan2(targetObj.y - this.y, targetObj.x - this.x);
+                        let diff = targetAngle - this.aimAngle;
+                        while (diff < -Math.PI) diff += Math.PI * 2;
+                        while (diff > Math.PI) diff -= Math.PI * 2;
+                        const turnRate = (this.state === 'solarbeam_fire') ? 0.010 : 0.022;
+                        this.aimAngle += diff * turnRate;
+                        this.facingLeft = (Math.cos(this.aimAngle) < 0);
+                    } else {
+                        this.aimAngle = Math.atan2(targetObj.y - this.y, targetObj.x - this.x);
+                        this.facingLeft = (targetObj.x < this.x);
+                    }
                 }
             }
         }
@@ -5061,6 +5091,11 @@
             // 피격 경직(hurt) 및 밀치기(넉백)를 주지 않아 매끄럽게 탈출 가능!
             if (isHazard) {
                 if (this.hp <= 0) {
+                    if (this !== p1 && currentDifficulty === 'sandbag') {
+                        this.hp = this.maxHp;
+                        showAlert('🥊 샌드백 체력 리셋 (무한 연습)!');
+                        return;
+                    }
                     this.isAlive = false;
                     showAlert(`${this.name} K.O.!`);
                     showGameOverModal(attacker);
@@ -5088,6 +5123,11 @@
             this.vy = kbY;
 
             if (this.hp <= 0) {
+                if (this !== p1 && currentDifficulty === 'sandbag') {
+                    this.hp = this.maxHp;
+                    showAlert('🥊 샌드백 체력 리셋 (무한 연습)!');
+                    return;
+                }
                 this.isAlive = false;
                 showAlert(`${this.name} K.O.!`);
                 showGameOverModal(attacker);
@@ -6633,7 +6673,7 @@
             species: p2Species,
             x: CENTER_X + 600,
             y: CENTER_Y,
-            isAI: (currentDifficulty !== 'sandbag')
+            isAI: true
         });
 
         camera.x = p1.x - VIEW_WIDTH / 2;
@@ -6670,11 +6710,15 @@
         });
 
         if (p2) {
-            p2.isAI = (diff !== 'sandbag');
+            p2.isAI = true;
             if (diff === 'sandbag') {
                 p2.vx = 0;
                 p2.vy = 0;
                 p2.state = 'idle';
+                p2.stunTimer = 0;
+                p2.stateTimer = 0;
+                p2.isSprintToggled = false;
+                p2.hp = p2.maxHp;
             }
         }
 
