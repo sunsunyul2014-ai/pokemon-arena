@@ -5031,18 +5031,19 @@
                         this.vx = 0;
                         this.vy = 0;
 
-                        const smashRadius = 190;
+                        // 본러시 2타 바닥 내리찍기 판정 반경을 직관적이고 알맞은 크기(90)로 대폭 축소
+                        const smashRadius = 90;
                         const smashDamage = 125;
                         sfx.playBoneRushSmash();
-                        triggerScreenShake(20);
+                        triggerScreenShake(12);
                         triggerHitstop(8);
-                        addGroundDecal(anchorX, anchorY, 55, 'crater');
-                        addGroundDecal(anchorX, anchorY, 44, 'electric');
+                        addGroundDecal(anchorX, anchorY, 34, 'crater');
+                        addGroundDecal(anchorX, anchorY, 26, 'electric');
 
-                        for (let i = 0; i < 28; i++) {
-                            const spd = Math.random() * 9 + 3;
+                        for (let i = 0; i < 22; i++) {
+                            const spd = Math.random() * 5.5 + 2;
                             const a = Math.random() * Math.PI * 2;
-                            particles.push(new Particle(anchorX, anchorY, Math.cos(a) * spd, Math.sin(a) * spd, Math.random() < 0.6 ? '#00e5ff' : '#2979ff', Math.random() * 9 + 4, 24, 'spark'));
+                            particles.push(new Particle(anchorX, anchorY, Math.cos(a) * spd, Math.sin(a) * spd, Math.random() < 0.6 ? '#00e5ff' : '#2979ff', Math.random() * 7 + 3, 20, 'spark'));
                         }
 
                         const targets = [opponent, ...scytherClones.filter(c => c.owner !== this && c.isAlive)];
@@ -5051,7 +5052,7 @@
                             const d = Math.hypot(tgt.x - anchorX, tgt.y - anchorY);
                             if (d <= smashRadius + tgt.radius) {
                                 const kbAngle = Math.atan2(tgt.y - anchorY, tgt.x - anchorX);
-                                tgt.takeDamage(smashDamage, this, true, Math.cos(kbAngle) * 26, Math.sin(kbAngle) * 26);
+                                tgt.takeDamage(smashDamage, this, true, Math.cos(kbAngle) * 22, Math.sin(kbAngle) * 22);
                                 tgt.applyStun(21); // 0.35초 스턴
                             }
                         }
@@ -5262,8 +5263,9 @@
                 }
             } else if (this.species === 'lucario') {
                 // 루카리오 AI 행동 패턴
-                if (this.boneRushAnchor && Math.random() < 0.25 * sm) {
-                    // 본러시 뼈다귀 박혀있으면 2차 시전 (순간이동 강타)
+                const anchorDist = this.boneRushAnchor ? Math.hypot(target.x - this.boneRushAnchor.x, target.y - this.boneRushAnchor.y) : 9999;
+                if (this.boneRushAnchor && (anchorDist <= 110 || this.boneRushAnchor.life < 45) && Math.random() < 0.28 * sm) {
+                    // 뼈다귀 근처에 적이 있거나 시간이 다 되어갈 때 순간이동 강타
                     this.useSkill('f');
                 } else if (dist <= 130 && this.cooldowns.attack <= 0 && Math.random() < 0.18 * sm) {
                     this.useSkill('attack'); // 불릿펀치 (근접)
