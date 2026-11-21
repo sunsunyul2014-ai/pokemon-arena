@@ -3377,349 +3377,7 @@
             }
         }
 
-        // [롱스톤 전용 고퀄리티 멀티 세그먼트 암석 뱀 렌더러]
-        drawOnixSnake(ctx) {
-            if (!this.segments || this.segments.length === 0) this.initOnixSegments();
-
-            // 1. 구멍파기(Burrowed) 상태 렌더링: 영상 초반처럼 웅장한 아치형 다이빙 및 바다뱀 융기 궤적
-            if (this.state === 'burrowed') {
-                this.drawBurrowedOnix(ctx);
-                return;
-            }
-
-            // 2. 바닥 지면 그림자 (각 세그먼트 돌마다 입체 타원 그림자)
-            for (let i = this.segments.length - 1; i >= 0; i--) {
-                const seg = this.segments[i];
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
-                ctx.beginPath();
-                ctx.ellipse(seg.x, seg.y + seg.radius * 0.55, seg.radius * 1.05, seg.radius * 0.42, 0, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            // 3. 세그먼트 간 암석 관절 연결부 (Connecting Joints)
-            ctx.strokeStyle = '#263238';
-            ctx.lineWidth = 14;
-            ctx.lineCap = 'round';
-            ctx.beginPath();
-            for (let i = 0; i < this.segments.length; i++) {
-                const seg = this.segments[i];
-                if (i === 0) ctx.moveTo(seg.x, seg.y);
-                else ctx.lineTo(seg.x, seg.y);
-            }
-            ctx.stroke();
-
-            // 4. 몸통 돌 및 꼬리 렌더링 (뒤에서부터 앞으로 그려 겹침 순서 유지)
-            for (let i = this.segments.length - 1; i >= 1; i--) {
-                const seg = this.segments[i];
-                this.drawSingleRockSegment(ctx, seg, i);
-            }
-
-            // 5. 머리 돌(Head Segment 0) 렌더링 (가장 크고 입체적인 디테일)
-            this.drawOnixHeadSegment(ctx, this.segments[0]);
-        }
-
-        // [구멍파기 렌더링: 롱스톤 본체는 완전히 숨기고, 그 대신 땅이 불룩하게 솟아오른 거대한 흙더미 능선(Raised Earth Mound)으로 렌더링]
-        drawBurrowedOnix(ctx) {
-            const head = this.segments[0];
-
-            // 1. 꼬리부터 머리까지 연결되는 불룩하게 솟아오른 거대한 흙더미(Raised Earth Mound) 융기 궤적
-            for (let i = this.segments.length - 1; i >= 1; i--) {
-                const seg = this.segments[i];
-                const rW = seg.radius * 1.35;
-                const rH = seg.radius * 0.85;
-
-                // (1) 지면 그림자
-                ctx.fillStyle = 'rgba(38, 24, 18, 0.45)';
-                ctx.beginPath();
-                ctx.ellipse(seg.x, seg.y + 6, rW * 1.1, rH * 0.7, seg.angle, 0, Math.PI * 2);
-                ctx.fill();
-
-                // (2) 솟아오른 흙 언덕 베이스 (진한 갈색)
-                ctx.fillStyle = '#5d4037';
-                ctx.strokeStyle = '#3e2723';
-                ctx.lineWidth = 3.5;
-                ctx.beginPath();
-                ctx.ellipse(seg.x, seg.y, rW, rH, seg.angle, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-
-                // (3) 불룩 솟아오른 토사 둔덕 중앙부 (밝은 갈색 융기)
-                ctx.fillStyle = '#795548';
-                ctx.beginPath();
-                ctx.ellipse(seg.x, seg.y - 4, rW * 0.75, rH * 0.6, seg.angle, 0, Math.PI * 2);
-                ctx.fill();
-
-                // (4) 솟아오른 지면 능선 크랙 & 하이라이트
-                ctx.strokeStyle = '#a1887f';
-                ctx.lineWidth = 2.2;
-                ctx.beginPath();
-                ctx.moveTo(seg.x - Math.cos(seg.angle) * (rW * 0.6), seg.y - Math.sin(seg.angle) * (rW * 0.6) - 4);
-                ctx.lineTo(seg.x + Math.cos(seg.angle) * (rW * 0.6), seg.y + Math.sin(seg.angle) * (rW * 0.6) - 4);
-                ctx.stroke();
-
-                // 갈라진 흙 크랙 선
-                ctx.strokeStyle = '#3e2723';
-                ctx.lineWidth = 1.6;
-                ctx.beginPath();
-                ctx.moveTo(seg.x, seg.y - 6);
-                ctx.lineTo(seg.x + Math.cos(seg.angle + Math.PI/2) * (rH * 0.5), seg.y + Math.sin(seg.angle + Math.PI/2) * (rH * 0.5) - 6);
-                ctx.stroke();
-            }
-
-            // 2. ★선단(얼굴/머리, segments[0]): 지면을 파헤치며 솟아오른 거대한 흙더미 선단 & 솟아난 암석 뿔 (대미지 판정 부위)★
-            ctx.save();
-            ctx.translate(head.x, head.y);
-            ctx.rotate(head.angle);
-
-            // 선단 거대 융기 흙더미
-            ctx.fillStyle = '#4e342e';
-            ctx.strokeStyle = '#271c19';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 50, 32, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.fillStyle = '#6d4c41';
-            ctx.beginPath();
-            ctx.ellipse(4, -4, 42, 24, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            // 지면을 가르며 튀어나온 날카로운 암석 뿔 선단 (흙먼지를 뚫고 전진)
-            ctx.fillStyle = '#78909c';
-            ctx.strokeStyle = '#263238';
-            ctx.lineWidth = 3.8;
-            ctx.beginPath();
-            ctx.moveTo(34, 0); // 뿔 선단
-            ctx.lineTo(-8, -24);
-            ctx.lineTo(-24, 0);
-            ctx.lineTo(-8, 24);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // 뿔 입체 능선
-            ctx.fillStyle = '#cfd8dc';
-            ctx.beginPath();
-            ctx.moveTo(34, 0);
-            ctx.lineTo(-8, -24);
-            ctx.lineTo(-4, 0);
-            ctx.closePath();
-            ctx.fill();
-
-            // 사나운 안광 (흙먼지 사이로 번뜩임)
-            ctx.fillStyle = '#ffeb3b';
-            ctx.beginPath();
-            ctx.arc(2, -9, 4, 0, Math.PI * 2);
-            ctx.arc(2, 9, 4, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#ff1744';
-            ctx.beginPath();
-            ctx.arc(2, -9, 2, 0, Math.PI * 2);
-            ctx.arc(2, 9, 2, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.restore();
-        }
-
-        // [단일 암석 몸통 세그먼트 렌더러]
-        drawSingleRockSegment(ctx, seg, index) {
-            ctx.save();
-            ctx.translate(seg.x, seg.y);
-            ctx.rotate(seg.angle);
-
-            ctx.fillStyle = (index % 2 === 0) ? '#607d8b' : '#546e7a';
-            ctx.strokeStyle = '#263238';
-            ctx.lineWidth = 3.5;
-
-            ctx.beginPath();
-            for (let i = 0; i < seg.vertices.length; i++) {
-                const pt = seg.vertices[i];
-                if (i === 0) ctx.moveTo(pt.x, pt.y);
-                else ctx.lineTo(pt.x, pt.y);
-            }
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // 상단 하이라이트
-            ctx.fillStyle = '#90a4ae';
-            ctx.beginPath();
-            ctx.moveTo(seg.vertices[0].x, seg.vertices[0].y);
-            ctx.lineTo(seg.vertices[2].x, seg.vertices[2].y);
-            ctx.lineTo(0, -seg.drawR * 0.2);
-            ctx.closePath();
-            ctx.fill();
-
-            // 하단 짙은 그림자
-            ctx.fillStyle = '#37474f';
-            ctx.beginPath();
-            ctx.moveTo(seg.vertices[4].x, seg.vertices[4].y);
-            ctx.lineTo(seg.vertices[6].x, seg.vertices[6].y);
-            ctx.lineTo(0, -seg.drawR * 0.2);
-            ctx.closePath();
-            ctx.fill();
-
-            // 크랙 라인
-            ctx.strokeStyle = '#263238';
-            ctx.lineWidth = 1.8;
-            ctx.beginPath();
-            ctx.moveTo(-seg.drawR * 0.3, -seg.drawR * 0.2);
-            ctx.lineTo(seg.drawR * 0.1, 0);
-            ctx.lineTo(seg.drawR * 0.35, seg.drawR * 0.3);
-            ctx.stroke();
-
-            ctx.restore();
-        }
-
-        // [롱스톤 머리 돌 세그먼트 렌더러 (얼굴, 뿔, 사나운 바위 눈, 단단한 턱선)]
-        drawOnixHeadSegment(ctx, head) {
-            ctx.save();
-            ctx.translate(head.x, head.y);
-            ctx.rotate(head.angle);
-
-            // 1. 머리 돌 본체
-            ctx.fillStyle = '#607d8b';
-            ctx.strokeStyle = '#263238';
-            ctx.lineWidth = 4.2;
-
-            ctx.beginPath();
-            for (let i = 0; i < head.vertices.length; i++) {
-                const pt = head.vertices[i];
-                if (i === 0) ctx.moveTo(pt.x, pt.y);
-                else ctx.lineTo(pt.x, pt.y);
-            }
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // 2. 머리 위 거대한 정수리 암석 뿔 (Rock Horn)
-            ctx.fillStyle = '#78909c';
-            ctx.beginPath();
-            ctx.moveTo(-16, -26);
-            ctx.lineTo(0, -78);
-            ctx.lineTo(16, -26);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.fillStyle = '#cfd8dc';
-            ctx.beginPath();
-            ctx.moveTo(0, -78);
-            ctx.lineTo(16, -26);
-            ctx.lineTo(0, -26);
-            ctx.closePath();
-            ctx.fill();
-
-            // 3. 이마 및 뺨 바위 능선
-            ctx.fillStyle = '#90a4ae';
-            ctx.beginPath();
-            ctx.moveTo(0, -26);
-            ctx.lineTo(24, -8);
-            ctx.lineTo(0, 10);
-            ctx.lineTo(-24, -8);
-            ctx.closePath();
-            ctx.fill();
-
-            // 4. 사나운 바위 눈썹 및 눈
-            ctx.fillStyle = '#1a237e';
-            ctx.fillRect(-18, -12, 10, 6);
-            ctx.fillRect(8, -12, 10, 6);
-
-            ctx.fillStyle = '#ff1744';
-            ctx.beginPath();
-            ctx.arc(-13, -9, 3.5, 0, Math.PI * 2);
-            ctx.arc(13, -9, 3.5, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = '#ffea00';
-            ctx.beginPath();
-            ctx.arc(-13, -9, 1.5, 0, Math.PI * 2);
-            ctx.arc(13, -9, 1.5, 0, Math.PI * 2);
-            ctx.fill();
-
-            // 5. 단단한 바위 턱선
-            ctx.fillStyle = '#455a64';
-            ctx.beginPath();
-            ctx.moveTo(-16, 20);
-            ctx.lineTo(0, 32);
-            ctx.lineTo(16, 20);
-            ctx.lineTo(0, 15);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // 6. 피격 진동/스파크
-            if (this.state === 'hurt' || this.stunTimer > 0) {
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                ctx.beginPath();
-                ctx.arc(0, 0, head.drawR * 0.9, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            ctx.restore();
-        }
-
-        // [꼬부기 물회오리/돌진 시 등껍질 속으로 들어가 고속 회전하는 모션 렌더러]
-        drawSquirtleShellSpin(ctx) {
-            ctx.save();
-            ctx.translate(this.x, this.y);
-            ctx.rotate(this.shellSpinAngle);
-
-            // 지면 그림자
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-            ctx.beginPath();
-            ctx.ellipse(0, 14, 30, 12, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            // 단단한 갈색 등껍질 외형
-            ctx.fillStyle = '#8d6e63';
-            ctx.strokeStyle = '#4e342e';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 26, 22, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            // 등껍질 하얀 림 (Rim)
-            ctx.strokeStyle = '#fff8e1';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 23, 19, 0, 0, Math.PI * 2);
-            ctx.stroke();
-
-            // 거북이 등껍질 6각형 문양
-            ctx.strokeStyle = '#4e342e';
-            ctx.lineWidth = 2.2;
-            ctx.beginPath();
-            for (let a = 0; a < 6; a++) {
-                const ang = (a * Math.PI) / 3;
-                const px = Math.cos(ang) * 11;
-                const py = Math.sin(ang) * 9;
-                if (a === 0) ctx.moveTo(px, py);
-                else ctx.lineTo(px, py);
-            }
-            ctx.closePath();
-            ctx.stroke();
-
-            // 4개 구멍에서 나선형으로 뿜어져 나오는 회전 물줄기 (물회오리 시)
-            if (this.state === 'whirlpool') {
-                ctx.strokeStyle = 'rgba(0, 229, 255, 0.92)';
-                ctx.lineWidth = 4.5;
-                ctx.lineCap = 'round';
-                for (let i = 0; i < 4; i++) {
-                    const a = (i * Math.PI) / 2;
-                    ctx.beginPath();
-                    ctx.moveTo(Math.cos(a) * 22, Math.sin(a) * 22);
-                    ctx.lineTo(Math.cos(a + 0.5) * 44, Math.sin(a + 0.5) * 44);
-                    ctx.stroke();
-                }
-            }
-
-            ctx.restore();
-        }
-
-        draw(ctx) {
+                draw(ctx) {
             ctx.save();
             ctx.translate(this.x, this.y);
 
@@ -7107,18 +6765,7 @@
                         showAlert('💥 본러시 바닥 내리치기 강타 성공! (5초간 평타/신속 강화) 💥');
                     }
                 }
-            } else if (this.species === 'blaziken') {
-                if (dist <= 135 && this.cooldowns.r <= 0 && Math.random() < 0.18 * sm) {
-                    this.useSkill('r'); // 인파이트 연격
-                } else if (dist >= 160 && dist <= 380 && this.cooldowns.q <= 0 && Math.random() < 0.12 * sm) {
-                    this.useSkill('q'); // 무릎차기 순간이동 급습
-                } else if (dist >= 250 && dist <= 650 && this.cooldowns.f <= 0 && Math.random() < 0.08 * sm) {
-                    this.useSkill('f'); // 플레어드라이브 화염 돌진
-                } else if (dist >= 220 && dist <= 550 && this.cooldowns.e <= 0 && Math.random() < 0.06 * sm) {
-                    this.useSkill('e'); // 뛰어오르기
-                } else if (dist <= 140 && this.cooldowns.attack <= 0 && Math.random() < 0.16 * sm) {
-                    this.useSkill('attack'); // 블레이즈킥 연타
-                }
+
             } else if (this.species === 'onix') {
                 if (slot === 'attack') {
                     // 평타: 근접 박치기 단일 (목을 당겼다 내려찍는다)
@@ -7558,7 +7205,20 @@
                 } else if (this.cooldowns.attack <= 0 && dist <= 165 && Math.random() < 0.12 * sm) {
                     this.useSkill('attack');
                 }
-            } else if (this.species === 'onix') {
+                        } else if (this.species === 'blaziken') {
+                // 번치코 AI 행동 패턴 (근접 인파이트, 무릎차기 급습, 플레어드라이브 돌진, 뛰어오르기)
+                if (dist <= 135 && this.cooldowns.r <= 0 && Math.random() < 0.18 * sm) {
+                    this.useSkill('r'); // 인파이트 연격
+                } else if (dist >= 160 && dist <= 380 && this.cooldowns.q <= 0 && Math.random() < 0.12 * sm) {
+                    this.useSkill('q'); // 무릎차기 순간이동 급습
+                } else if (dist >= 250 && dist <= 650 && this.cooldowns.f <= 0 && Math.random() < 0.08 * sm) {
+                    this.useSkill('f'); // 플레어드라이브 화염 돌진
+                } else if (dist >= 220 && dist <= 550 && this.cooldowns.e <= 0 && Math.random() < 0.06 * sm) {
+                    this.useSkill('e'); // 뛰어오르기
+                } else if (dist <= 140 && this.cooldowns.attack <= 0 && Math.random() < 0.16 * sm) {
+                    this.useSkill('attack'); // 블레이즈킥 연타
+                }
+} else if (this.species === 'onix') {
                 const oppIsBurrowed = (target.state === 'burrowed');
                 if (oppIsBurrowed && this.cooldowns.e <= 0) {
                     this.useSkill('e');
@@ -7588,6 +7248,348 @@
                     this.useSkill('attack');
                 }
             }
+        }
+
+        // [롱스톤 전용 고퀄리티 멀티 세그먼트 암석 뱀 렌더러]
+        drawOnixSnake(ctx) {
+            if (!this.segments || this.segments.length === 0) this.initOnixSegments();
+
+            // 1. 구멍파기(Burrowed) 상태 렌더링: 영상 초반처럼 웅장한 아치형 다이빙 및 바다뱀 융기 궤적
+            if (this.state === 'burrowed') {
+                this.drawBurrowedOnix(ctx);
+                return;
+            }
+
+            // 2. 바닥 지면 그림자 (각 세그먼트 돌마다 입체 타원 그림자)
+            for (let i = this.segments.length - 1; i >= 0; i--) {
+                const seg = this.segments[i];
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
+                ctx.beginPath();
+                ctx.ellipse(seg.x, seg.y + seg.radius * 0.55, seg.radius * 1.05, seg.radius * 0.42, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // 3. 세그먼트 간 암석 관절 연결부 (Connecting Joints)
+            ctx.strokeStyle = '#263238';
+            ctx.lineWidth = 14;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            for (let i = 0; i < this.segments.length; i++) {
+                const seg = this.segments[i];
+                if (i === 0) ctx.moveTo(seg.x, seg.y);
+                else ctx.lineTo(seg.x, seg.y);
+            }
+            ctx.stroke();
+
+            // 4. 몸통 돌 및 꼬리 렌더링 (뒤에서부터 앞으로 그려 겹침 순서 유지)
+            for (let i = this.segments.length - 1; i >= 1; i--) {
+                const seg = this.segments[i];
+                this.drawSingleRockSegment(ctx, seg, i);
+            }
+
+            // 5. 머리 돌(Head Segment 0) 렌더링 (가장 크고 입체적인 디테일)
+            this.drawOnixHeadSegment(ctx, this.segments[0]);
+        }
+
+        // [구멍파기 렌더링: 롱스톤 본체는 완전히 숨기고, 그 대신 땅이 불룩하게 솟아오른 거대한 흙더미 능선(Raised Earth Mound)으로 렌더링]
+        drawBurrowedOnix(ctx) {
+            const head = this.segments[0];
+
+            // 1. 꼬리부터 머리까지 연결되는 불룩하게 솟아오른 거대한 흙더미(Raised Earth Mound) 융기 궤적
+            for (let i = this.segments.length - 1; i >= 1; i--) {
+                const seg = this.segments[i];
+                const rW = seg.radius * 1.35;
+                const rH = seg.radius * 0.85;
+
+                // (1) 지면 그림자
+                ctx.fillStyle = 'rgba(38, 24, 18, 0.45)';
+                ctx.beginPath();
+                ctx.ellipse(seg.x, seg.y + 6, rW * 1.1, rH * 0.7, seg.angle, 0, Math.PI * 2);
+                ctx.fill();
+
+                // (2) 솟아오른 흙 언덕 베이스 (진한 갈색)
+                ctx.fillStyle = '#5d4037';
+                ctx.strokeStyle = '#3e2723';
+                ctx.lineWidth = 3.5;
+                ctx.beginPath();
+                ctx.ellipse(seg.x, seg.y, rW, rH, seg.angle, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // (3) 불룩 솟아오른 토사 둔덕 중앙부 (밝은 갈색 융기)
+                ctx.fillStyle = '#795548';
+                ctx.beginPath();
+                ctx.ellipse(seg.x, seg.y - 4, rW * 0.75, rH * 0.6, seg.angle, 0, Math.PI * 2);
+                ctx.fill();
+
+                // (4) 솟아오른 지면 능선 크랙 & 하이라이트
+                ctx.strokeStyle = '#a1887f';
+                ctx.lineWidth = 2.2;
+                ctx.beginPath();
+                ctx.moveTo(seg.x - Math.cos(seg.angle) * (rW * 0.6), seg.y - Math.sin(seg.angle) * (rW * 0.6) - 4);
+                ctx.lineTo(seg.x + Math.cos(seg.angle) * (rW * 0.6), seg.y + Math.sin(seg.angle) * (rW * 0.6) - 4);
+                ctx.stroke();
+
+                // 갈라진 흙 크랙 선
+                ctx.strokeStyle = '#3e2723';
+                ctx.lineWidth = 1.6;
+                ctx.beginPath();
+                ctx.moveTo(seg.x, seg.y - 6);
+                ctx.lineTo(seg.x + Math.cos(seg.angle + Math.PI/2) * (rH * 0.5), seg.y + Math.sin(seg.angle + Math.PI/2) * (rH * 0.5) - 6);
+                ctx.stroke();
+            }
+
+            // 2. ★선단(얼굴/머리, segments[0]): 지면을 파헤치며 솟아오른 거대한 흙더미 선단 & 솟아난 암석 뿔 (대미지 판정 부위)★
+            ctx.save();
+            ctx.translate(head.x, head.y);
+            ctx.rotate(head.angle);
+
+            // 선단 거대 융기 흙더미
+            ctx.fillStyle = '#4e342e';
+            ctx.strokeStyle = '#271c19';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 50, 32, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#6d4c41';
+            ctx.beginPath();
+            ctx.ellipse(4, -4, 42, 24, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 지면을 가르며 튀어나온 날카로운 암석 뿔 선단 (흙먼지를 뚫고 전진)
+            ctx.fillStyle = '#78909c';
+            ctx.strokeStyle = '#263238';
+            ctx.lineWidth = 3.8;
+            ctx.beginPath();
+            ctx.moveTo(34, 0); // 뿔 선단
+            ctx.lineTo(-8, -24);
+            ctx.lineTo(-24, 0);
+            ctx.lineTo(-8, 24);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // 뿔 입체 능선
+            ctx.fillStyle = '#cfd8dc';
+            ctx.beginPath();
+            ctx.moveTo(34, 0);
+            ctx.lineTo(-8, -24);
+            ctx.lineTo(-4, 0);
+            ctx.closePath();
+            ctx.fill();
+
+            // 사나운 안광 (흙먼지 사이로 번뜩임)
+            ctx.fillStyle = '#ffeb3b';
+            ctx.beginPath();
+            ctx.arc(2, -9, 4, 0, Math.PI * 2);
+            ctx.arc(2, 9, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ff1744';
+            ctx.beginPath();
+            ctx.arc(2, -9, 2, 0, Math.PI * 2);
+            ctx.arc(2, 9, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // [단일 암석 몸통 세그먼트 렌더러]
+        drawSingleRockSegment(ctx, seg, index) {
+            ctx.save();
+            ctx.translate(seg.x, seg.y);
+            ctx.rotate(seg.angle);
+
+            ctx.fillStyle = (index % 2 === 0) ? '#607d8b' : '#546e7a';
+            ctx.strokeStyle = '#263238';
+            ctx.lineWidth = 3.5;
+
+            ctx.beginPath();
+            for (let i = 0; i < seg.vertices.length; i++) {
+                const pt = seg.vertices[i];
+                if (i === 0) ctx.moveTo(pt.x, pt.y);
+                else ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // 상단 하이라이트
+            ctx.fillStyle = '#90a4ae';
+            ctx.beginPath();
+            ctx.moveTo(seg.vertices[0].x, seg.vertices[0].y);
+            ctx.lineTo(seg.vertices[2].x, seg.vertices[2].y);
+            ctx.lineTo(0, -seg.drawR * 0.2);
+            ctx.closePath();
+            ctx.fill();
+
+            // 하단 짙은 그림자
+            ctx.fillStyle = '#37474f';
+            ctx.beginPath();
+            ctx.moveTo(seg.vertices[4].x, seg.vertices[4].y);
+            ctx.lineTo(seg.vertices[6].x, seg.vertices[6].y);
+            ctx.lineTo(0, -seg.drawR * 0.2);
+            ctx.closePath();
+            ctx.fill();
+
+            // 크랙 라인
+            ctx.strokeStyle = '#263238';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.moveTo(-seg.drawR * 0.3, -seg.drawR * 0.2);
+            ctx.lineTo(seg.drawR * 0.1, 0);
+            ctx.lineTo(seg.drawR * 0.35, seg.drawR * 0.3);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        // [롱스톤 머리 돌 세그먼트 렌더러 (얼굴, 뿔, 사나운 바위 눈, 단단한 턱선)]
+        drawOnixHeadSegment(ctx, head) {
+            ctx.save();
+            ctx.translate(head.x, head.y);
+            ctx.rotate(head.angle);
+
+            // 1. 머리 돌 본체
+            ctx.fillStyle = '#607d8b';
+            ctx.strokeStyle = '#263238';
+            ctx.lineWidth = 4.2;
+
+            ctx.beginPath();
+            for (let i = 0; i < head.vertices.length; i++) {
+                const pt = head.vertices[i];
+                if (i === 0) ctx.moveTo(pt.x, pt.y);
+                else ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // 2. 머리 위 거대한 정수리 암석 뿔 (Rock Horn)
+            ctx.fillStyle = '#78909c';
+            ctx.beginPath();
+            ctx.moveTo(-16, -26);
+            ctx.lineTo(0, -78);
+            ctx.lineTo(16, -26);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#cfd8dc';
+            ctx.beginPath();
+            ctx.moveTo(0, -78);
+            ctx.lineTo(16, -26);
+            ctx.lineTo(0, -26);
+            ctx.closePath();
+            ctx.fill();
+
+            // 3. 이마 및 뺨 바위 능선
+            ctx.fillStyle = '#90a4ae';
+            ctx.beginPath();
+            ctx.moveTo(0, -26);
+            ctx.lineTo(24, -8);
+            ctx.lineTo(0, 10);
+            ctx.lineTo(-24, -8);
+            ctx.closePath();
+            ctx.fill();
+
+            // 4. 사나운 바위 눈썹 및 눈
+            ctx.fillStyle = '#1a237e';
+            ctx.fillRect(-18, -12, 10, 6);
+            ctx.fillRect(8, -12, 10, 6);
+
+            ctx.fillStyle = '#ff1744';
+            ctx.beginPath();
+            ctx.arc(-13, -9, 3.5, 0, Math.PI * 2);
+            ctx.arc(13, -9, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffea00';
+            ctx.beginPath();
+            ctx.arc(-13, -9, 1.5, 0, Math.PI * 2);
+            ctx.arc(13, -9, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 5. 단단한 바위 턱선
+            ctx.fillStyle = '#455a64';
+            ctx.beginPath();
+            ctx.moveTo(-16, 20);
+            ctx.lineTo(0, 32);
+            ctx.lineTo(16, 20);
+            ctx.lineTo(0, 15);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // 6. 피격 진동/스파크
+            if (this.state === 'hurt' || this.stunTimer > 0) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.beginPath();
+                ctx.arc(0, 0, head.drawR * 0.9, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        // [꼬부기 물회오리/돌진 시 등껍질 속으로 들어가 고속 회전하는 모션 렌더러]
+        drawSquirtleShellSpin(ctx) {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.shellSpinAngle);
+
+            // 지면 그림자
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+            ctx.beginPath();
+            ctx.ellipse(0, 14, 30, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 단단한 갈색 등껍질 외형
+            ctx.fillStyle = '#8d6e63';
+            ctx.strokeStyle = '#4e342e';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 26, 22, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // 등껍질 하얀 림 (Rim)
+            ctx.strokeStyle = '#fff8e1';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 23, 19, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // 거북이 등껍질 6각형 문양
+            ctx.strokeStyle = '#4e342e';
+            ctx.lineWidth = 2.2;
+            ctx.beginPath();
+            for (let a = 0; a < 6; a++) {
+                const ang = (a * Math.PI) / 3;
+                const px = Math.cos(ang) * 11;
+                const py = Math.sin(ang) * 9;
+                if (a === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.stroke();
+
+            // 4개 구멍에서 나선형으로 뿜어져 나오는 회전 물줄기 (물회오리 시)
+            if (this.state === 'whirlpool') {
+                ctx.strokeStyle = 'rgba(0, 229, 255, 0.92)';
+                ctx.lineWidth = 4.5;
+                ctx.lineCap = 'round';
+                for (let i = 0; i < 4; i++) {
+                    const a = (i * Math.PI) / 2;
+                    ctx.beginPath();
+                    ctx.moveTo(Math.cos(a) * 22, Math.sin(a) * 22);
+                    ctx.lineTo(Math.cos(a + 0.5) * 44, Math.sin(a + 0.5) * 44);
+                    ctx.stroke();
+                }
+            }
+
+            ctx.restore();
         }
 
         draw(ctx) {
