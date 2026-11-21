@@ -7270,8 +7270,8 @@
             }
 
             // 3. 세그먼트 간 암석 관절 연결부 (Connecting Joints)
-            ctx.strokeStyle = '#263238';
-            ctx.lineWidth = 14;
+            ctx.strokeStyle = '#8e9aab';
+            ctx.lineWidth = 10;
             ctx.lineCap = 'round';
             ctx.beginPath();
             for (let i = 0; i < this.segments.length; i++) {
@@ -7399,48 +7399,30 @@
         drawSingleRockSegment(ctx, seg, index) {
             ctx.save();
             ctx.translate(seg.x, seg.y);
-            ctx.rotate(seg.angle);
+            const r = seg.drawR;
 
-            ctx.fillStyle = (index % 2 === 0) ? '#607d8b' : '#546e7a';
-            ctx.strokeStyle = '#263238';
-            ctx.lineWidth = 3.5;
-
+            // 실제 포켓몬 롱스톤: 밝은 회색 둥근 돌구슬
+            // 메인 돌구슬 (밝은 블루그레이)
+            const grad = ctx.createRadialGradient(-r * 0.3, -r * 0.3, r * 0.05, 0, 0, r);
+            grad.addColorStop(0, '#dde3e8');
+            grad.addColorStop(0.4, '#b8bec7');
+            grad.addColorStop(1, '#8e9aab');
+            ctx.fillStyle = grad;
+            ctx.strokeStyle = '#7a8899';
+            ctx.lineWidth = 1.5;
             ctx.beginPath();
-            for (let i = 0; i < seg.vertices.length; i++) {
-                const pt = seg.vertices[i];
-                if (i === 0) ctx.moveTo(pt.x, pt.y);
-                else ctx.lineTo(pt.x, pt.y);
-            }
-            ctx.closePath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
 
-            // 상단 하이라이트
-            ctx.fillStyle = '#90a4ae';
+            // 상단 하이라이트 (왼쪽 위 빛 반사)
+            const hl = ctx.createRadialGradient(-r * 0.35, -r * 0.35, 0, -r * 0.2, -r * 0.2, r * 0.65);
+            hl.addColorStop(0, 'rgba(255,255,255,0.65)');
+            hl.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = hl;
             ctx.beginPath();
-            ctx.moveTo(seg.vertices[0].x, seg.vertices[0].y);
-            ctx.lineTo(seg.vertices[2].x, seg.vertices[2].y);
-            ctx.lineTo(0, -seg.drawR * 0.2);
-            ctx.closePath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
             ctx.fill();
-
-            // 하단 짙은 그림자
-            ctx.fillStyle = '#37474f';
-            ctx.beginPath();
-            ctx.moveTo(seg.vertices[4].x, seg.vertices[4].y);
-            ctx.lineTo(seg.vertices[6].x, seg.vertices[6].y);
-            ctx.lineTo(0, -seg.drawR * 0.2);
-            ctx.closePath();
-            ctx.fill();
-
-            // 크랙 라인
-            ctx.strokeStyle = '#263238';
-            ctx.lineWidth = 1.8;
-            ctx.beginPath();
-            ctx.moveTo(-seg.drawR * 0.3, -seg.drawR * 0.2);
-            ctx.lineTo(seg.drawR * 0.1, 0);
-            ctx.lineTo(seg.drawR * 0.35, seg.drawR * 0.3);
-            ctx.stroke();
 
             ctx.restore();
         }
@@ -7449,84 +7431,84 @@
         drawOnixHeadSegment(ctx, head) {
             ctx.save();
             ctx.translate(head.x, head.y);
-            ctx.rotate(head.angle);
+            const r = head.drawR;
 
-            // 1. 머리 돌 본체
-            ctx.fillStyle = '#607d8b';
-            ctx.strokeStyle = '#263238';
-            ctx.lineWidth = 4.2;
-
+            // 실제 포켓몬 롱스톤 머리: 크고 둥근 밝은 회색 돌
+            // 메인 머리 구체
+            const grad = ctx.createRadialGradient(-r * 0.3, -r * 0.35, r * 0.05, 0, 0, r);
+            grad.addColorStop(0, '#e0e5ea');
+            grad.addColorStop(0.4, '#b8bec7');
+            grad.addColorStop(1, '#8a96a8');
+            ctx.fillStyle = grad;
+            ctx.strokeStyle = '#7a8899';
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            for (let i = 0; i < head.vertices.length; i++) {
-                const pt = head.vertices[i];
-                if (i === 0) ctx.moveTo(pt.x, pt.y);
-                else ctx.lineTo(pt.x, pt.y);
-            }
-            ctx.closePath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
 
-            // 2. 머리 위 거대한 정수리 암석 뿔 (Rock Horn)
-            ctx.fillStyle = '#78909c';
+            // 상단 하이라이트
+            const hl = ctx.createRadialGradient(-r * 0.35, -r * 0.4, 0, -r * 0.2, -r * 0.25, r * 0.7);
+            hl.addColorStop(0, 'rgba(255,255,255,0.7)');
+            hl.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = hl;
             ctx.beginPath();
-            ctx.moveTo(-16, -26);
-            ctx.lineTo(0, -78);
-            ctx.lineTo(16, -26);
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 머리 위 뿔 (실제 롱스톤처럼 뾰족하고 짧은 뿔)
+            ctx.fillStyle = '#6b7a8a';
+            ctx.strokeStyle = '#4a5568';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(-8, -r * 0.6);
+            ctx.lineTo(0, -r * 1.55);
+            ctx.lineTo(8, -r * 0.6);
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
-
-            ctx.fillStyle = '#cfd8dc';
+            // 뿔 하이라이트
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
             ctx.beginPath();
-            ctx.moveTo(0, -78);
-            ctx.lineTo(16, -26);
-            ctx.lineTo(0, -26);
+            ctx.moveTo(0, -r * 1.55);
+            ctx.lineTo(8, -r * 0.6);
+            ctx.lineTo(0, -r * 0.9);
             ctx.closePath();
             ctx.fill();
 
-            // 3. 이마 및 뺨 바위 능선
-            ctx.fillStyle = '#90a4ae';
+            // 눈 (검정 동그란 눈, 포켓몬 스타일)
+            const eyeY = -r * 0.1;
+            const eyeX = r * 0.35;
+            // 왼쪽 눈
+            ctx.fillStyle = '#1a1a2e';
             ctx.beginPath();
-            ctx.moveTo(0, -26);
-            ctx.lineTo(24, -8);
-            ctx.lineTo(0, 10);
-            ctx.lineTo(-24, -8);
-            ctx.closePath();
+            ctx.arc(-eyeX, eyeY, r * 0.18, 0, Math.PI * 2);
+            ctx.fill();
+            // 오른쪽 눈
+            ctx.beginPath();
+            ctx.arc(eyeX, eyeY, r * 0.18, 0, Math.PI * 2);
+            ctx.fill();
+            // 눈 하이라이트 (흰 반짝임)
+            ctx.fillStyle = 'rgba(255,255,255,0.85)';
+            ctx.beginPath();
+            ctx.arc(-eyeX + r * 0.07, eyeY - r * 0.07, r * 0.07, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(eyeX + r * 0.07, eyeY - r * 0.07, r * 0.07, 0, Math.PI * 2);
             ctx.fill();
 
-            // 4. 사나운 바위 눈썹 및 눈
-            ctx.fillStyle = '#1a237e';
-            ctx.fillRect(-18, -12, 10, 6);
-            ctx.fillRect(8, -12, 10, 6);
-
-            ctx.fillStyle = '#ff1744';
+            // 입 (작고 귀여운 선)
+            ctx.strokeStyle = '#5a6475';
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.arc(-13, -9, 3.5, 0, Math.PI * 2);
-            ctx.arc(13, -9, 3.5, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = '#ffea00';
-            ctx.beginPath();
-            ctx.arc(-13, -9, 1.5, 0, Math.PI * 2);
-            ctx.arc(13, -9, 1.5, 0, Math.PI * 2);
-            ctx.fill();
-
-            // 5. 단단한 바위 턱선
-            ctx.fillStyle = '#455a64';
-            ctx.beginPath();
-            ctx.moveTo(-16, 20);
-            ctx.lineTo(0, 32);
-            ctx.lineTo(16, 20);
-            ctx.lineTo(0, 15);
-            ctx.closePath();
-            ctx.fill();
+            ctx.arc(0, r * 0.25, r * 0.22, 0.1, Math.PI - 0.1);
             ctx.stroke();
 
-            // 6. 피격 진동/스파크
+            // 피격 플래시
             if (this.state === 'hurt' || this.stunTimer > 0) {
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
                 ctx.beginPath();
-                ctx.arc(0, 0, head.drawR * 0.9, 0, Math.PI * 2);
+                ctx.arc(0, 0, r, 0, Math.PI * 2);
                 ctx.fill();
             }
 
