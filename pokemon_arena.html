@@ -885,7 +885,7 @@
                             <div class="skill-slot" id="slot-e">
                                 <span class="skill-key">E</span>
                                 <div class="skill-icon" id="icon-e">🌋</div>
-                                <div class="skill-name" id="name-e">불꽃 장판</div>
+                                <div class="skill-name" id="name-e">불꽃회오리</div>
                                 <div class="cooldown-overlay" id="cd-e">0.0</div>
                             </div>
                             <div class="skill-slot" id="slot-r">
@@ -1358,6 +1358,65 @@
             osc.connect(gain); gain.connect(this.ctx.destination);
             osc.start(now); osc.stop(now + 0.48);
         }
+        playRockSmash() {
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const filter = this.ctx.createBiquadFilter();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(140, now);
+            osc.frequency.exponentialRampToValueAtTime(35, now + 0.35);
+            filter.type = 'lowpass'; filter.frequency.setValueAtTime(450, now);
+            gain.gain.setValueAtTime(0.55, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+            osc.connect(filter); filter.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(now); osc.stop(now + 0.36);
+        }
+        playEarthquake() {
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const filter = this.ctx.createBiquadFilter();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(80, now);
+            osc.frequency.linearRampToValueAtTime(40, now + 0.6);
+            filter.type = 'lowpass'; filter.frequency.setValueAtTime(300, now);
+            gain.gain.setValueAtTime(0.65, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.65);
+            osc.connect(filter); filter.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(now); osc.stop(now + 0.66);
+        }
+        playDig() {
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const filter = this.ctx.createBiquadFilter();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(220, now);
+            osc.frequency.exponentialRampToValueAtTime(60, now + 0.28);
+            filter.type = 'bandpass'; filter.frequency.setValueAtTime(500, now);
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.28);
+            osc.connect(filter); filter.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(now); osc.stop(now + 0.3);
+        }
+        playBind() {
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(110, now);
+            osc.frequency.linearRampToValueAtTime(220, now + 0.15);
+            osc.frequency.linearRampToValueAtTime(90, now + 0.3);
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.32);
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(now); osc.stop(now + 0.33);
+        }
     }
     const sfx = new SoundEngine();
 
@@ -1368,26 +1427,30 @@
         bulbasaur: new Image(),
         pikachu: new Image(),
         scyther: new Image(),
-        lucario: new Image()
+        lucario: new Image(),
+        onix: new Image(),
+        blaziken: new Image()
     };
-    spriteSheets.charmander.crossOrigin = 'anonymous';
-    spriteSheets.charmander.src = 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/0004/Walk-Anim.png';
 
-    spriteSheets.squirtle.crossOrigin = 'anonymous';
-    spriteSheets.squirtle.src = 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/0007/Walk-Anim.png';
+    function loadSafeSprite(species, remoteUrl, localUrl) {
+        const img = spriteSheets[species];
+        img.crossOrigin = 'anonymous';
+        img.onerror = () => {
+            img.crossOrigin = null;
+            img.onerror = null;
+            if (localUrl) img.src = localUrl;
+        };
+        img.src = remoteUrl;
+    }
 
-    spriteSheets.bulbasaur.crossOrigin = 'anonymous';
-    spriteSheets.bulbasaur.src = 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/0001/Walk-Anim.png';
-
-    spriteSheets.pikachu.crossOrigin = 'anonymous';
-    spriteSheets.pikachu.src = 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/0025/Walk-Anim.png';
-
-    spriteSheets.scyther.crossOrigin = 'anonymous';
-    spriteSheets.scyther.src = 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/0123/Walk-Anim.png';
-
-    spriteSheets.lucario.crossOrigin = 'anonymous';
-    spriteSheets.lucario.onerror = () => { spriteSheets.lucario.src = './lucario_walk.png'; };
-    spriteSheets.lucario.src = 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/0448/Walk-Anim.png';
+    loadSafeSprite('charmander', 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/0004/Walk-Anim.png', './charmander_walk.png');
+    loadSafeSprite('squirtle', 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/0007/Walk-Anim.png', './squirtle_walk.png');
+    loadSafeSprite('bulbasaur', 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/0001/Walk-Anim.png', './bulbasaur_walk.png');
+    loadSafeSprite('pikachu', 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/0025/Walk-Anim.png', './pikachu_walk.png');
+    loadSafeSprite('scyther', 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/0123/Walk-Anim.png', './scyther_walk.png');
+    loadSafeSprite('lucario', 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/0448/Walk-Anim.png', './lucario_walk.png');
+    loadSafeSprite('onix', 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/0095/Walk-Anim.png', './onix_walk.png');
+    loadSafeSprite('blaziken', 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/0257/Walk-Anim.png', './blaziken_walk.png');
 
     const arenaContainer = document.getElementById('arena-container');
     const canvas = document.getElementById('gameCanvas');
@@ -1507,6 +1570,16 @@
         if (e.key === '3') { setDifficulty('normal'); return; }
         if (e.key === '4') { setDifficulty('hard'); return; }
         if (e.key === '5') { setDifficulty('hell'); return; }
+
+        // 롱스톤 조이기(Bind) QTE 탈출 키 입력 처리
+        if (p1 && p1.isAlive && p1.boundBy) {
+            const escapeKey = (p1.boundBy.qteKey || '').toLowerCase();
+            const pressedKey = e.key.toLowerCase();
+            if (pressedKey === escapeKey || (escapeKey === 'space' && e.code === 'Space')) {
+                p1.boundBy.onQteHit(p1);
+                return;
+            }
+        }
 
         if (p1 && p1.isAlive) {
             if (e.key.toLowerCase() === 'q') p1.useSkill('q');
@@ -1648,57 +1721,111 @@
         }
     }
 
-    // --- 장판 효과 1: 불꽃 장판 (파이리 E스킬) ---
+    // --- 장판 효과 1: 불꽃회오리 (Fire Spin - 회전하는 3갈래 화염 소용돌이 기둥) ---
     class GroundFlameField {
-        constructor(x, y, owner, radius = 140, duration = 300, damagePerTick = 16) {
+        constructor(x, y, owner, radius = 150, duration = 320, damagePerTick = 18) {
             this.x = x; this.y = y; this.owner = owner;
             this.radius = radius; this.duration = duration;
             this.damagePerTick = damagePerTick;
             this.tickTimer = 0;
+            this.spinAngle = 0;
             this.pulse = 0;
         }
         update(targets) {
             this.duration--;
             this.tickTimer++;
-            this.pulse += 0.08;
+            this.spinAngle += 0.16; // 맹렬한 소용돌이 회전
+            this.pulse += 0.1;
 
-            if (Math.random() < 0.7) {
-                const angle = Math.random() * Math.PI * 2;
-                const dist = Math.random() * this.radius;
-                particles.push(new Particle(this.x + Math.cos(angle) * dist, this.y + Math.sin(angle) * dist, (Math.random() - 0.5) * 1.5, -Math.random() * 3 - 1, Math.random() < 0.5 ? '#ff3d00' : '#ffea00', Math.random() * 10 + 4, 25, 'flame'));
+            // 나선형으로 회전하며 치솟는 화염 파티클
+            for (let i = 0; i < 3; i++) {
+                const a = this.spinAngle + (i * Math.PI * 2 / 3);
+                const r = (Math.sin(this.tickTimer * 0.15 + i) * 0.4 + 0.6) * this.radius;
+                const px = this.x + Math.cos(a) * r;
+                const py = this.y + Math.sin(a) * r;
+                particles.push(new Particle(
+                    px, py,
+                    -Math.sin(a) * 5.5,
+                    Math.cos(a) * 5.5 - Math.random() * 4 - 2,
+                    Math.random() < 0.6 ? '#ff3d00' : (Math.random() < 0.5 ? '#ffea00' : '#ffffff'),
+                    Math.random() * 9 + 5,
+                    22,
+                    'flame'
+                ));
             }
 
-            if (this.tickTimer % 15 === 0) {
-                for (const target of targets) {
-                    if (target !== this.owner && target.isAlive) {
-                        const dist = Math.hypot(target.x - this.x, target.y - this.y);
-                        if (dist <= this.radius + target.radius) {
+            // 소용돌이 중심 쪽으로 적 흡인 & 지속 DoT 피해
+            for (const target of targets) {
+                if (target !== this.owner && target.isAlive) {
+                    const dist = Math.hypot(target.x - this.x, target.y - this.y);
+                    if (dist <= this.radius + target.radius) {
+                        // 회오리 중심 쪽으로 서서히 빨아들임
+                        const pullAngle = Math.atan2(this.y - target.y, this.x - target.x);
+                        target.x += Math.cos(pullAngle) * 1.2;
+                        target.y += Math.sin(pullAngle) * 1.2;
+
+                        if (this.tickTimer % 12 === 0) {
                             target.takeDamage(this.damagePerTick, this.owner, false, 0, 0, true);
-                            triggerScreenShake(2);
+                            triggerScreenShake(2.5);
                         }
                     }
                 }
             }
+
+            // 종료 시 대형 화염 소용돌이 폭발
+            if (this.duration <= 0) {
+                if (typeof sfx !== 'undefined' && sfx.playExplosion) sfx.playExplosion();
+                triggerScreenShake(8);
+                addGroundDecal(this.x, this.y, 50, 'scorch');
+                for (let i = 0; i < 22; i++) {
+                    const a = Math.random() * Math.PI * 2;
+                    const spd = Math.random() * 8 + 3;
+                    particles.push(new Particle(this.x, this.y, Math.cos(a) * spd, Math.sin(a) * spd - 3, '#ff3d00', 8, 25, 'flame'));
+                }
+            }
         }
         draw(ctx) {
-            const alpha = Math.min(1, this.duration / 40);
+            const alpha = Math.min(1, this.duration / 35);
             ctx.save();
+            ctx.translate(this.x, this.y);
             ctx.globalCompositeOperation = 'lighter';
-            ctx.globalAlpha = alpha * 0.8;
-            const grad = ctx.createRadialGradient(this.x, this.y, 10, this.x, this.y, this.radius);
-            grad.addColorStop(0, 'rgba(255, 234, 0, 0.85)');
-            grad.addColorStop(0.5, 'rgba(255, 68, 0, 0.55)');
-            grad.addColorStop(1, 'rgba(255, 0, 0, 0)');
+            ctx.globalAlpha = alpha * 0.9;
+
+            // 1. 바닥 타오르는 마그마 코어
+            const grad = ctx.createRadialGradient(0, 0, 5, 0, 0, this.radius);
+            grad.addColorStop(0, 'rgba(255, 255, 200, 0.95)');
+            grad.addColorStop(0.3, 'rgba(255, 140, 0, 0.7)');
+            grad.addColorStop(0.7, 'rgba(255, 20, 0, 0.4)');
+            grad.addColorStop(1, 'rgba(180, 0, 0, 0)');
             ctx.fillStyle = grad;
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius + Math.sin(this.pulse) * 6, 0, Math.PI * 2);
+            ctx.arc(0, 0, this.radius * (0.95 + Math.sin(this.pulse) * 0.06), 0, Math.PI * 2);
             ctx.fill();
 
-            ctx.strokeStyle = '#ff9100';
-            ctx.lineWidth = 3.5;
+            // 2. 맹렬하게 회전하는 3갈래 화염 소용돌이 팔 (Fire Spin Spiral Arms)
+            ctx.rotate(this.spinAngle);
+            ctx.lineWidth = 9;
+            ctx.lineCap = 'round';
+            for (let i = 0; i < 3; i++) {
+                const baseA = (i * Math.PI * 2) / 3;
+                ctx.strokeStyle = (i % 2 === 0) ? 'rgba(255, 61, 0, 0.85)' : 'rgba(255, 234, 0, 0.9)';
+                ctx.beginPath();
+                for (let r = 8; r <= this.radius; r += 12) {
+                    const curA = baseA + (r / this.radius) * 1.8;
+                    const px = Math.cos(curA) * r;
+                    const py = Math.sin(curA) * r;
+                    if (r === 8) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+            }
+
+            // 3. 중심부 불기둥 코어
+            ctx.fillStyle = '#fff9c4';
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.stroke();
+            ctx.arc(0, 0, 16 + Math.sin(this.pulse * 1.5) * 4, 0, Math.PI * 2);
+            ctx.fill();
+
             ctx.restore();
         }
     }
@@ -2084,6 +2211,34 @@
     // --- 지형 파괴 및 스킬 흔적 데칼 시스템 ---
     const groundDecals = [];
 
+    // 지면 갈라짐(Ground Fissure) 균열 생성 헬퍼
+    function addGroundFissure(x, y, maxRadius = 320, branches = 6) {
+        if (!window.groundFissures) window.groundFissures = [];
+        const lines = [];
+        for (let b = 0; b < branches; b++) {
+            const baseAng = (b / branches) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+            const branchLen = maxRadius * (0.65 + Math.random() * 0.35);
+            const pts = [{ x: 0, y: 0 }];
+            let curD = 0;
+            let curA = baseAng;
+            while (curD < branchLen) {
+                curD += Math.random() * 32 + 20;
+                curA += (Math.random() - 0.5) * 0.6;
+                pts.push({
+                    x: Math.cos(curA) * curD,
+                    y: Math.sin(curA) * curD
+                });
+            }
+            lines.push(pts);
+        }
+        window.groundFissures.push({
+            x, y, lines,
+            life: 450, maxLife: 450,
+            radius: maxRadius
+        });
+        if (window.groundFissures.length > 15) window.groundFissures.shift();
+    }
+
     function addGroundDecal(x, y, radius, type) {
         if (groundDecals.length > 40) groundDecals.shift();
         groundDecals.push({
@@ -2180,6 +2335,413 @@
                 }
             }
 
+            ctx.restore();
+        }
+    }
+
+    const stoneRocks = [];
+
+    // [스톤에지 바위 장애물 클래스 - 체력 100, 길을 막음, 서로 가운데로 모여 사선으로 솟아남, 파괴 시 주변 대미지/넉백]
+    class StoneEdgeRock {
+        constructor(x, y, owner, tiltAngle = 0, tiltAmount = 0.35) {
+            this.x = x;
+            this.y = y;
+            this.owner = owner;
+            this.hp = 100;
+            this.maxHp = 100;
+            this.radius = 28;
+            this.isAlive = true;
+            this.spawnScale = 0;
+            this.lifeTimer = 900;
+            this.tiltAngle = tiltAngle; // 중심을 향해 사선으로 기울어지는 각도
+            this.tiltAmount = tiltAmount;
+            this.points = [];
+            const numPts = 8;
+            for (let i = 0; i < numPts; i++) {
+                const ang = (i / numPts) * Math.PI * 2;
+                const r = this.radius * (0.8 + ((i % 3 === 0) ? 0.35 : -0.15) + (Math.sin(i * 1.7) * 0.15));
+                this.points.push({ x: Math.cos(ang) * r, y: Math.sin(ang) * r });
+            }
+            if (typeof sfx !== 'undefined' && sfx.playRockSmash) sfx.playRockSmash();
+        }
+        takeDamage(dmg, attacker) {
+            if (!this.isAlive) return;
+            this.hp -= dmg;
+            damageTexts.push(new DamageText(this.x, this.y - 15, `-${Math.round(dmg)}`, '#b0bec5', false));
+            if (typeof sfx !== 'undefined' && sfx.playHit) sfx.playHit();
+            for (let i = 0; i < 4; i++) {
+                const a = Math.random() * Math.PI * 2;
+                particles.push(new Particle(this.x, this.y, Math.cos(a) * 3, Math.sin(a) * 3, '#90a4ae', Math.random() * 5 + 3, 16));
+            }
+            if (this.hp <= 0) {
+                this.destroy(attacker);
+            }
+        }
+        destroy(attacker) {
+            if (!this.isAlive) return;
+            this.isAlive = false;
+            if (typeof sfx !== 'undefined' && sfx.playRockSmash) sfx.playRockSmash();
+            triggerScreenShake(8);
+            addGroundDecal(this.x, this.y, 45, 'crater');
+            showAlert('💥 스톤에지 바위 파괴 폭발!');
+            const splashR = 140;
+            const targets = (typeof p1 !== 'undefined' && typeof p2 !== 'undefined') ?
+                [p1, p2, ...(typeof scytherClones !== 'undefined' ? scytherClones : [])].filter(c => c && c.isAlive) : [];
+            for (const tgt of targets) {
+                const d = Math.hypot(tgt.x - this.x, tgt.y - this.y);
+                if (d <= splashR + tgt.radius) {
+                    const kbAng = Math.atan2(tgt.y - this.y, tgt.x - this.x);
+                    tgt.takeDamage(65, this.owner, true, Math.cos(kbAng) * 16, Math.sin(kbAng) * 16);
+                }
+            }
+            for (let i = 0; i < 22; i++) {
+                const a = Math.random() * Math.PI * 2;
+                const spd = Math.random() * 8 + 2;
+                particles.push(new Particle(
+                    this.x, this.y,
+                    Math.cos(a) * spd, Math.sin(a) * spd - 2,
+                    Math.random() < 0.5 ? '#78909c' : '#b0bec5',
+                    Math.random() * 7 + 4,
+                    30,
+                    'spark'
+                ));
+            }
+        }
+        update() {
+            if (this.spawnScale < 1) this.spawnScale = Math.min(1, this.spawnScale + 0.15);
+            this.lifeTimer--;
+            if (this.lifeTimer <= 0 && this.isAlive) {
+                this.destroy(this.owner);
+            }
+        }
+        draw(ctx) {
+            if (!this.isAlive) return;
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.scale(this.spawnScale, this.spawnScale);
+
+            // 지면 그림자
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.48)';
+            ctx.beginPath();
+            ctx.ellipse(0, 16, this.radius * 1.15, this.radius * 0.45, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 가운데를 향한 사선 틸트 회전
+            if (this.tiltAmount !== 0) {
+                ctx.rotate(this.tiltAngle * 0.25);
+            }
+
+            // 바위 외곽선 및 본체 (사선 기둥 실루엣)
+            ctx.fillStyle = '#607d8b';
+            ctx.strokeStyle = '#263238';
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            for (let i = 0; i < this.points.length; i++) {
+                const pt = this.points[i];
+                // 중심 쪽으로 약간 기운 사선 오프셋 반영
+                const tiltX = (pt.y < 0) ? Math.cos(this.tiltAngle) * (this.tiltAmount * 18) : 0;
+                const tiltY = (pt.y < 0) ? Math.sin(this.tiltAngle) * (this.tiltAmount * 18) : 0;
+                if (i === 0) ctx.moveTo(pt.x + tiltX, pt.y + tiltY);
+                else ctx.lineTo(pt.x + tiltX, pt.y + tiltY);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // 날카로운 암석 능선 및 하이라이트
+            ctx.fillStyle = '#90a4ae';
+            ctx.beginPath();
+            ctx.moveTo(this.points[0].x, this.points[0].y);
+            ctx.lineTo(this.points[2].x, this.points[2].y);
+            ctx.lineTo(0, -10);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#37474f';
+            ctx.beginPath();
+            ctx.moveTo(this.points[4].x, this.points[4].y);
+            ctx.lineTo(this.points[6].x, this.points[6].y);
+            ctx.lineTo(0, -10);
+            ctx.closePath();
+            ctx.fill();
+            if (this.hp < this.maxHp) {
+                const bw = 36;
+                const bh = 5;
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(-bw / 2, -this.radius - 14, bw, bh);
+                ctx.fillStyle = (this.hp > 40) ? '#00e676' : '#ff1744';
+                ctx.fillRect(-bw / 2, -this.radius - 14, (this.hp / this.maxHp) * bw, bh);
+            }
+            ctx.restore();
+        }
+    }
+
+    // [지진 전방위 충격파 - 구멍파기 대상 2배 대미지]
+    class EarthquakeShockwave {
+        constructor(x, y, owner, maxRadius = 400, duration = 42, damage = 95) {
+            this.x = x;
+            this.y = y;
+            this.owner = owner;
+            this.maxRadius = maxRadius;
+            this.duration = duration;
+            this.maxDuration = duration;
+            this.damage = damage;
+            this.hitTargets = new Set();
+        }
+        update(arenaTargets) {
+            this.duration--;
+            const progress = 1 - (this.duration / this.maxDuration);
+            const currentR = this.maxRadius * progress;
+            for (const tgt of arenaTargets) {
+                if (!tgt || !tgt.isAlive || tgt === this.owner || this.hitTargets.has(tgt)) continue;
+                const dist = Math.hypot(tgt.x - this.x, tgt.y - this.y);
+                if (dist <= currentR + tgt.radius && dist >= currentR - 70) {
+                    this.hitTargets.add(tgt);
+                    const isBurrowed = (tgt.state === 'burrowed');
+                    const dmg = isBurrowed ? (this.damage * 2) : this.damage;
+                    if (isBurrowed) {
+                        tgt.state = 'knockdown';
+                        tgt.stateTimer = 35;
+                        tgt.burrowTimer = 0;
+                        tgt.invincibleTimer = 0;
+                        showAlert('⚡ [지진 특효!] 땅속의 구멍파기 상대를 강타! (2배 피해!)');
+                    }
+                    const kbAng = Math.atan2(tgt.y - this.y, tgt.x - this.x);
+                    tgt.takeDamage(dmg, this.owner, true, Math.cos(kbAng) * (isBurrowed ? 22 : 14), Math.sin(kbAng) * (isBurrowed ? 22 : 14));
+                }
+            }
+            if (Math.random() < 0.6) {
+                const a = Math.random() * Math.PI * 2;
+                const r = currentR * (0.8 + Math.random() * 0.2);
+                particles.push(new Particle(
+                    this.x + Math.cos(a) * r,
+                    this.y + Math.sin(a) * r,
+                    Math.cos(a) * 3, Math.sin(a) * 3 - 2,
+                    Math.random() < 0.5 ? '#8d6e63' : '#b0bec5',
+                    Math.random() * 8 + 4,
+                    22,
+                    'spark'
+                ));
+            }
+        }
+        draw(ctx) {
+            const progress = 1 - (this.duration / this.maxDuration);
+            const currentR = this.maxRadius * progress;
+            const alpha = Math.max(0, 1 - progress);
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.strokeStyle = `rgba(187, 134, 91, ${alpha * 0.9})`;
+            ctx.lineWidth = 8 * (1 - progress * 0.5);
+            ctx.beginPath();
+            ctx.arc(0, 0, currentR, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.strokeStyle = `rgba(255, 236, 179, ${alpha * 0.7})`;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(0, 0, currentR - 8, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = `rgba(141, 110, 99, ${alpha * 0.2})`;
+            ctx.beginPath();
+            ctx.arc(0, 0, currentR, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    // [포켓몬별 조이기(R: Bind) 전용 감싸기 모션 렌더링]
+    function drawBindVictimMotion(ctx, onix, victim) {
+        if (!victim || !victim.isAlive) return;
+        const time = onix.animTick || 0;
+        const sp = victim.species;
+        ctx.save();
+        ctx.translate(victim.x, victim.y);
+        const rockBase = '#78909c';
+        const rockDark = '#37474f';
+        if (sp === 'pikachu') {
+            const wobble = Math.sin(time * 0.3) * 3;
+            for (let ring = 0; ring < 3; ring++) {
+                const r = 24 - ring * 5 + wobble;
+                const offY = (ring - 1) * 8;
+                ctx.fillStyle = rockBase;
+                ctx.strokeStyle = rockDark;
+                ctx.lineWidth = 3;
+                for (let i = 0; i < 4; i++) {
+                    const ang = (i / 4) * Math.PI * 2 + time * 0.08 + ring * 0.7;
+                    ctx.beginPath();
+                    ctx.arc(Math.cos(ang) * r, Math.sin(ang) * r * 0.5 + offY, 7 - ring, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+            }
+            if (Math.random() < 0.6) {
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(12, -4); ctx.lineTo(20, -10 + Math.random() * 6);
+                ctx.moveTo(-12, -4); ctx.lineTo(-20, -10 + Math.random() * 6);
+                ctx.stroke();
+            }
+        } else if (sp === 'charmander') {
+            const pulse = Math.sin(time * 0.25) * 2;
+            ctx.fillStyle = rockBase;
+            ctx.strokeStyle = rockDark;
+            ctx.lineWidth = 3.5;
+            for (let i = -1; i <= 1; i++) {
+                ctx.beginPath();
+                ctx.arc(i * 14, 0 + pulse, 9, 0, Math.PI * 2);
+                ctx.fill(); ctx.stroke();
+            }
+            for (let j = -1; j <= 1; j++) {
+                ctx.beginPath();
+                ctx.arc(0, j * 15 - 5 + pulse, 8, 0, Math.PI * 2);
+                ctx.fill(); ctx.stroke();
+            }
+            ctx.fillStyle = '#ff5722';
+            ctx.beginPath();
+            ctx.arc(22, 10, 6 + Math.random() * 4, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (sp === 'squirtle') {
+            ctx.fillStyle = rockBase;
+            ctx.strokeStyle = rockDark;
+            ctx.lineWidth = 3.5;
+            for (let i = 0; i < 6; i++) {
+                const ang = (i / 6) * Math.PI * 2 + time * 0.05;
+                const r = 26 + Math.sin(time * 0.2 + i) * 3;
+                ctx.beginPath();
+                ctx.arc(Math.cos(ang) * r, Math.sin(ang) * (r * 0.6), 9, 0, Math.PI * 2);
+                ctx.fill(); ctx.stroke();
+            }
+            if (Math.random() < 0.5) {
+                ctx.fillStyle = '#00e5ff';
+                ctx.beginPath();
+                ctx.arc((Math.random() - 0.5) * 30, (Math.random() - 0.5) * 20, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        } else if (sp === 'bulbasaur') {
+            ctx.fillStyle = rockBase;
+            ctx.strokeStyle = rockDark;
+            ctx.lineWidth = 3.5;
+            for (let i = -2; i <= 2; i++) {
+                ctx.beginPath();
+                ctx.arc(i * 11, i * 7, 8, 0, Math.PI * 2);
+                ctx.fill(); ctx.stroke();
+            }
+            for (let i = -2; i <= 2; i++) {
+                ctx.beginPath();
+                ctx.arc(i * 11, -i * 7, 8, 0, Math.PI * 2);
+                ctx.fill(); ctx.stroke();
+            }
+            if (Math.random() < 0.5) {
+                ctx.fillStyle = '#76ff03';
+                ctx.fillRect((Math.random() - 0.5) * 32, -24 + (Math.random() - 0.5) * 8, 4, 4);
+            }
+        } else if (sp === 'scyther') {
+            ctx.fillStyle = rockBase;
+            ctx.strokeStyle = rockDark;
+            ctx.lineWidth = 3.5;
+            for (let i = -2; i <= 2; i++) {
+                ctx.beginPath();
+                ctx.arc(i * 12, i * 8, 8, 0, Math.PI * 2);
+                ctx.fill(); ctx.stroke();
+            }
+            ctx.beginPath(); ctx.arc(-24, -10, 10, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.arc(24, -10, 10, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.arc(-16, -28, 9, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.arc(16, -28, 9, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.arc(0, 6, 12, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.beginPath();
+            ctx.arc(-24, -10, 14, 0, Math.PI);
+            ctx.arc(24, -10, 14, 0, Math.PI);
+            ctx.stroke();
+        } else if (sp === 'lucario') {
+            ctx.fillStyle = rockBase;
+            ctx.strokeStyle = rockDark;
+            ctx.lineWidth = 4;
+            for (let i = 0; i < 7; i++) {
+                const ang = (i / 7) * Math.PI * 2 + time * 0.04;
+                const r = 28 + Math.sin(time * 0.2 + i) * 2;
+                ctx.beginPath();
+                ctx.arc(Math.cos(ang) * r, Math.sin(ang) * (r * 0.7) - 6, 10, 0, Math.PI * 2);
+                ctx.fill(); ctx.stroke();
+            }
+            ctx.strokeStyle = 'rgba(0, 229, 255, 0.7)';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(0, -10, 32 + Math.sin(time * 0.3) * 4, 0, Math.PI * 2);
+            ctx.stroke();
+        } else {
+            ctx.fillStyle = rockBase;
+            ctx.strokeStyle = rockDark;
+            ctx.lineWidth = 3.5;
+            for (let i = 0; i < 6; i++) {
+                const ang = (i / 6) * Math.PI * 2 + time * 0.05;
+                ctx.beginPath();
+                ctx.arc(Math.cos(ang) * 26, Math.sin(ang) * 16, 9, 0, Math.PI * 2);
+                ctx.fill(); ctx.stroke();
+            }
+        }
+        ctx.restore();
+    }
+
+    // [QTE 탈출 HUD 화면]
+    function drawQteHud(ctx) {
+        if (typeof p1 === 'undefined' || !p1) return;
+        if (p1.isAlive && p1.boundBy) {
+            const onix = p1.boundBy;
+            const curHits = onix.qteHitsCurrent || 0;
+            const needHits = onix.qteHitsNeeded || 5;
+            const key = (onix.qteKey || 'SPACE').toUpperCase();
+            ctx.save();
+            const cx = VIEW_WIDTH / 2;
+            const cy = 200;
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+            ctx.strokeStyle = '#ff1744';
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.roundRect(cx - 240, cy - 65, 480, 130, 12);
+            ctx.fill();
+            ctx.stroke();
+            ctx.font = '13px "Press Start 2P", monospace';
+            ctx.fillStyle = '#ff5252';
+            ctx.textAlign = 'center';
+            ctx.fillText('⚠️ 롱스톤 [조이기] 속박!', cx, cy - 32);
+            ctx.font = '13px "Noto Sans KR", sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(`영문 키 [ ${key} ] 버튼을 연속으로 눌러 탈출하세요!`, cx, cy - 8);
+            const pulse = 1 + Math.sin(Date.now() * 0.015) * 0.12;
+            ctx.save();
+            ctx.translate(cx, cy + 24);
+            ctx.scale(pulse, pulse);
+            ctx.fillStyle = '#ffd700';
+            ctx.font = '22px "Press Start 2P", monospace';
+            ctx.fillText(`[ ${key} ]`, 0, 0);
+            ctx.restore();
+            const barW = 320;
+            const barH = 12;
+            const barY = cy + 42;
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(cx - barW / 2, barY, barW, barH);
+            ctx.fillStyle = '#00e676';
+            ctx.fillRect(cx - barW / 2, barY, (curHits / needHits) * barW, barH);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(cx - barW / 2, barY, barW, barH);
+            ctx.font = '10px "Press Start 2P", monospace';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(`${curHits} / ${needHits}`, cx, barY + 20);
+            ctx.restore();
+        } else if (typeof p2 !== 'undefined' && p2 && p2.isAlive && p2.boundBy && p2.boundBy === p1) {
+            const onix = p1;
+            const curHits = onix.qteHitsCurrent || 0;
+            const needHits = onix.qteHitsNeeded || 5;
+            ctx.save();
+            const sx = p2.x - camera.x;
+            const sy = p2.y - camera.y - 65;
+            ctx.font = '9px "Press Start 2P", monospace';
+            ctx.fillStyle = '#ffd700';
+            ctx.textAlign = 'center';
+            ctx.fillText(`🐍 조이기 속박 중 (${curHits}/${needHits})`, sx, sy);
             ctx.restore();
         }
     }
@@ -2362,6 +2924,22 @@
         update(arenaEnemies, allProjectiles) {
             this.life--;
             this.wobble += 0.12;
+
+            // 스톤에지 바위 오브젝트와의 충돌 체크 (길을 막고 공격을 받으면 파괴됨)
+            if (typeof stoneRocks !== 'undefined') {
+                for (const rock of stoneRocks) {
+                    if (!rock || !rock.isAlive) continue;
+                    const dist = Math.hypot(rock.x - this.x, rock.y - this.y);
+                    if (dist <= this.radius + rock.radius) {
+                        rock.takeDamage(this.damage, this.owner);
+                        if (!this.piercing) {
+                            this.life = 0;
+                            if (this.expireRange) this.expireRange();
+                            return;
+                        }
+                    }
+                }
+            }
 
             // 사거리 체크
             const stepDist = Math.hypot(this.vx, this.vy);
@@ -2677,8 +3255,14 @@
 
             for (const enemy of arenaEnemies) {
                 if (enemy !== this.owner && enemy.isAlive) {
-                    const dist = Math.hypot(enemy.x - this.x, enemy.y - this.y);
-                    if (dist <= this.radius + enemy.radius) {
+                    let isHit = false;
+                    if (enemy.isHitByCircle) {
+                        isHit = enemy.isHitByCircle(this.x, this.y, this.radius);
+                    } else {
+                        const dist = Math.hypot(enemy.x - this.x, enemy.y - this.y);
+                        isHit = (dist <= this.radius + enemy.radius);
+                    }
+                    if (isHit) {
                         if (this.type === 'flamethrower') {
                             const lastHit = this.hitCooldowns.get(enemy) || 0;
                             if (this.life - lastHit > 8 || lastHit === 0) {
@@ -2793,6 +3377,348 @@
             }
         }
 
+        // [롱스톤 전용 고퀄리티 멀티 세그먼트 암석 뱀 렌더러]
+        drawOnixSnake(ctx) {
+            if (!this.segments || this.segments.length === 0) this.initOnixSegments();
+
+            // 1. 구멍파기(Burrowed) 상태 렌더링: 영상 초반처럼 웅장한 아치형 다이빙 및 바다뱀 융기 궤적
+            if (this.state === 'burrowed') {
+                this.drawBurrowedOnix(ctx);
+                return;
+            }
+
+            // 2. 바닥 지면 그림자 (각 세그먼트 돌마다 입체 타원 그림자)
+            for (let i = this.segments.length - 1; i >= 0; i--) {
+                const seg = this.segments[i];
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
+                ctx.beginPath();
+                ctx.ellipse(seg.x, seg.y + seg.radius * 0.55, seg.radius * 1.05, seg.radius * 0.42, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // 3. 세그먼트 간 암석 관절 연결부 (Connecting Joints)
+            ctx.strokeStyle = '#263238';
+            ctx.lineWidth = 14;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            for (let i = 0; i < this.segments.length; i++) {
+                const seg = this.segments[i];
+                if (i === 0) ctx.moveTo(seg.x, seg.y);
+                else ctx.lineTo(seg.x, seg.y);
+            }
+            ctx.stroke();
+
+            // 4. 몸통 돌 및 꼬리 렌더링 (뒤에서부터 앞으로 그려 겹침 순서 유지)
+            for (let i = this.segments.length - 1; i >= 1; i--) {
+                const seg = this.segments[i];
+                this.drawSingleRockSegment(ctx, seg, i);
+            }
+
+            // 5. 머리 돌(Head Segment 0) 렌더링 (가장 크고 입체적인 디테일)
+            this.drawOnixHeadSegment(ctx, this.segments[0]);
+        }
+
+        // [구멍파기 렌더링: 롱스톤 본체는 완전히 숨기고, 그 대신 땅이 불룩하게 솟아오른 거대한 흙더미 능선(Raised Earth Mound)으로 렌더링]
+        drawBurrowedOnix(ctx) {
+            const head = this.segments[0];
+
+            // 1. 꼬리부터 머리까지 연결되는 불룩하게 솟아오른 거대한 흙더미(Raised Earth Mound) 융기 궤적
+            for (let i = this.segments.length - 1; i >= 1; i--) {
+                const seg = this.segments[i];
+                const rW = seg.radius * 1.35;
+                const rH = seg.radius * 0.85;
+
+                // (1) 지면 그림자
+                ctx.fillStyle = 'rgba(38, 24, 18, 0.45)';
+                ctx.beginPath();
+                ctx.ellipse(seg.x, seg.y + 6, rW * 1.1, rH * 0.7, seg.angle, 0, Math.PI * 2);
+                ctx.fill();
+
+                // (2) 솟아오른 흙 언덕 베이스 (진한 갈색)
+                ctx.fillStyle = '#5d4037';
+                ctx.strokeStyle = '#3e2723';
+                ctx.lineWidth = 3.5;
+                ctx.beginPath();
+                ctx.ellipse(seg.x, seg.y, rW, rH, seg.angle, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // (3) 불룩 솟아오른 토사 둔덕 중앙부 (밝은 갈색 융기)
+                ctx.fillStyle = '#795548';
+                ctx.beginPath();
+                ctx.ellipse(seg.x, seg.y - 4, rW * 0.75, rH * 0.6, seg.angle, 0, Math.PI * 2);
+                ctx.fill();
+
+                // (4) 솟아오른 지면 능선 크랙 & 하이라이트
+                ctx.strokeStyle = '#a1887f';
+                ctx.lineWidth = 2.2;
+                ctx.beginPath();
+                ctx.moveTo(seg.x - Math.cos(seg.angle) * (rW * 0.6), seg.y - Math.sin(seg.angle) * (rW * 0.6) - 4);
+                ctx.lineTo(seg.x + Math.cos(seg.angle) * (rW * 0.6), seg.y + Math.sin(seg.angle) * (rW * 0.6) - 4);
+                ctx.stroke();
+
+                // 갈라진 흙 크랙 선
+                ctx.strokeStyle = '#3e2723';
+                ctx.lineWidth = 1.6;
+                ctx.beginPath();
+                ctx.moveTo(seg.x, seg.y - 6);
+                ctx.lineTo(seg.x + Math.cos(seg.angle + Math.PI/2) * (rH * 0.5), seg.y + Math.sin(seg.angle + Math.PI/2) * (rH * 0.5) - 6);
+                ctx.stroke();
+            }
+
+            // 2. ★선단(얼굴/머리, segments[0]): 지면을 파헤치며 솟아오른 거대한 흙더미 선단 & 솟아난 암석 뿔 (대미지 판정 부위)★
+            ctx.save();
+            ctx.translate(head.x, head.y);
+            ctx.rotate(head.angle);
+
+            // 선단 거대 융기 흙더미
+            ctx.fillStyle = '#4e342e';
+            ctx.strokeStyle = '#271c19';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 50, 32, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#6d4c41';
+            ctx.beginPath();
+            ctx.ellipse(4, -4, 42, 24, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 지면을 가르며 튀어나온 날카로운 암석 뿔 선단 (흙먼지를 뚫고 전진)
+            ctx.fillStyle = '#78909c';
+            ctx.strokeStyle = '#263238';
+            ctx.lineWidth = 3.8;
+            ctx.beginPath();
+            ctx.moveTo(34, 0); // 뿔 선단
+            ctx.lineTo(-8, -24);
+            ctx.lineTo(-24, 0);
+            ctx.lineTo(-8, 24);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // 뿔 입체 능선
+            ctx.fillStyle = '#cfd8dc';
+            ctx.beginPath();
+            ctx.moveTo(34, 0);
+            ctx.lineTo(-8, -24);
+            ctx.lineTo(-4, 0);
+            ctx.closePath();
+            ctx.fill();
+
+            // 사나운 안광 (흙먼지 사이로 번뜩임)
+            ctx.fillStyle = '#ffeb3b';
+            ctx.beginPath();
+            ctx.arc(2, -9, 4, 0, Math.PI * 2);
+            ctx.arc(2, 9, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ff1744';
+            ctx.beginPath();
+            ctx.arc(2, -9, 2, 0, Math.PI * 2);
+            ctx.arc(2, 9, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // [단일 암석 몸통 세그먼트 렌더러]
+        drawSingleRockSegment(ctx, seg, index) {
+            ctx.save();
+            ctx.translate(seg.x, seg.y);
+            ctx.rotate(seg.angle);
+
+            ctx.fillStyle = (index % 2 === 0) ? '#607d8b' : '#546e7a';
+            ctx.strokeStyle = '#263238';
+            ctx.lineWidth = 3.5;
+
+            ctx.beginPath();
+            for (let i = 0; i < seg.vertices.length; i++) {
+                const pt = seg.vertices[i];
+                if (i === 0) ctx.moveTo(pt.x, pt.y);
+                else ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // 상단 하이라이트
+            ctx.fillStyle = '#90a4ae';
+            ctx.beginPath();
+            ctx.moveTo(seg.vertices[0].x, seg.vertices[0].y);
+            ctx.lineTo(seg.vertices[2].x, seg.vertices[2].y);
+            ctx.lineTo(0, -seg.drawR * 0.2);
+            ctx.closePath();
+            ctx.fill();
+
+            // 하단 짙은 그림자
+            ctx.fillStyle = '#37474f';
+            ctx.beginPath();
+            ctx.moveTo(seg.vertices[4].x, seg.vertices[4].y);
+            ctx.lineTo(seg.vertices[6].x, seg.vertices[6].y);
+            ctx.lineTo(0, -seg.drawR * 0.2);
+            ctx.closePath();
+            ctx.fill();
+
+            // 크랙 라인
+            ctx.strokeStyle = '#263238';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.moveTo(-seg.drawR * 0.3, -seg.drawR * 0.2);
+            ctx.lineTo(seg.drawR * 0.1, 0);
+            ctx.lineTo(seg.drawR * 0.35, seg.drawR * 0.3);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        // [롱스톤 머리 돌 세그먼트 렌더러 (얼굴, 뿔, 사나운 바위 눈, 단단한 턱선)]
+        drawOnixHeadSegment(ctx, head) {
+            ctx.save();
+            ctx.translate(head.x, head.y);
+            ctx.rotate(head.angle);
+
+            // 1. 머리 돌 본체
+            ctx.fillStyle = '#607d8b';
+            ctx.strokeStyle = '#263238';
+            ctx.lineWidth = 4.2;
+
+            ctx.beginPath();
+            for (let i = 0; i < head.vertices.length; i++) {
+                const pt = head.vertices[i];
+                if (i === 0) ctx.moveTo(pt.x, pt.y);
+                else ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // 2. 머리 위 거대한 정수리 암석 뿔 (Rock Horn)
+            ctx.fillStyle = '#78909c';
+            ctx.beginPath();
+            ctx.moveTo(-16, -26);
+            ctx.lineTo(0, -78);
+            ctx.lineTo(16, -26);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#cfd8dc';
+            ctx.beginPath();
+            ctx.moveTo(0, -78);
+            ctx.lineTo(16, -26);
+            ctx.lineTo(0, -26);
+            ctx.closePath();
+            ctx.fill();
+
+            // 3. 이마 및 뺨 바위 능선
+            ctx.fillStyle = '#90a4ae';
+            ctx.beginPath();
+            ctx.moveTo(0, -26);
+            ctx.lineTo(24, -8);
+            ctx.lineTo(0, 10);
+            ctx.lineTo(-24, -8);
+            ctx.closePath();
+            ctx.fill();
+
+            // 4. 사나운 바위 눈썹 및 눈
+            ctx.fillStyle = '#1a237e';
+            ctx.fillRect(-18, -12, 10, 6);
+            ctx.fillRect(8, -12, 10, 6);
+
+            ctx.fillStyle = '#ff1744';
+            ctx.beginPath();
+            ctx.arc(-13, -9, 3.5, 0, Math.PI * 2);
+            ctx.arc(13, -9, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffea00';
+            ctx.beginPath();
+            ctx.arc(-13, -9, 1.5, 0, Math.PI * 2);
+            ctx.arc(13, -9, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 5. 단단한 바위 턱선
+            ctx.fillStyle = '#455a64';
+            ctx.beginPath();
+            ctx.moveTo(-16, 20);
+            ctx.lineTo(0, 32);
+            ctx.lineTo(16, 20);
+            ctx.lineTo(0, 15);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // 6. 피격 진동/스파크
+            if (this.state === 'hurt' || this.stunTimer > 0) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.beginPath();
+                ctx.arc(0, 0, head.drawR * 0.9, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        // [꼬부기 물회오리/돌진 시 등껍질 속으로 들어가 고속 회전하는 모션 렌더러]
+        drawSquirtleShellSpin(ctx) {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.shellSpinAngle);
+
+            // 지면 그림자
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+            ctx.beginPath();
+            ctx.ellipse(0, 14, 30, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 단단한 갈색 등껍질 외형
+            ctx.fillStyle = '#8d6e63';
+            ctx.strokeStyle = '#4e342e';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 26, 22, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // 등껍질 하얀 림 (Rim)
+            ctx.strokeStyle = '#fff8e1';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 23, 19, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // 거북이 등껍질 6각형 문양
+            ctx.strokeStyle = '#4e342e';
+            ctx.lineWidth = 2.2;
+            ctx.beginPath();
+            for (let a = 0; a < 6; a++) {
+                const ang = (a * Math.PI) / 3;
+                const px = Math.cos(ang) * 11;
+                const py = Math.sin(ang) * 9;
+                if (a === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.stroke();
+
+            // 4개 구멍에서 나선형으로 뿜어져 나오는 회전 물줄기 (물회오리 시)
+            if (this.state === 'whirlpool') {
+                ctx.strokeStyle = 'rgba(0, 229, 255, 0.92)';
+                ctx.lineWidth = 4.5;
+                ctx.lineCap = 'round';
+                for (let i = 0; i < 4; i++) {
+                    const a = (i * Math.PI) / 2;
+                    ctx.beginPath();
+                    ctx.moveTo(Math.cos(a) * 22, Math.sin(a) * 22);
+                    ctx.lineTo(Math.cos(a + 0.5) * 44, Math.sin(a + 0.5) * 44);
+                    ctx.stroke();
+                }
+            }
+
+            ctx.restore();
+        }
+
         draw(ctx) {
             ctx.save();
             ctx.translate(this.x, this.y);
@@ -2891,15 +3817,30 @@
                 ctx.fill();
 
             } else if (this.type === 'flamethrower') {
+                // 리자몽 스타일 굵고 포효하는 드래곤 화염방사 스트림
                 ctx.globalCompositeOperation = 'lighter';
-                const grad = ctx.createRadialGradient(0, 0, 2, 0, 0, this.radius);
-                grad.addColorStop(0, 'rgba(255, 255, 220, 0.98)');
-                grad.addColorStop(0.35, 'rgba(255, 170, 0, 0.88)');
-                grad.addColorStop(0.75, 'rgba(255, 45, 0, 0.7)');
-                grad.addColorStop(1, 'rgba(200, 0, 0, 0)');
+                ctx.rotate(this.angle);
+
+                // 고열 백열 코어
+                const grad = ctx.createRadialGradient(0, 0, 2, 0, 0, this.radius * 1.3);
+                grad.addColorStop(0, '#ffffff');
+                grad.addColorStop(0.25, '#fff176');
+                grad.addColorStop(0.55, '#ff5722');
+                grad.addColorStop(0.85, '#d50000');
+                grad.addColorStop(1, 'rgba(180, 0, 0, 0)');
                 ctx.fillStyle = grad;
                 ctx.beginPath();
-                ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                ctx.ellipse(0, 0, this.radius * 1.35, this.radius * 0.9, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 화염의 혀 텍스처
+                ctx.fillStyle = 'rgba(255, 235, 59, 0.85)';
+                ctx.beginPath();
+                ctx.moveTo(this.radius * 0.8, 0);
+                ctx.lineTo(-this.radius * 0.5, -this.radius * 0.6);
+                ctx.lineTo(-this.radius * 0.2, 0);
+                ctx.lineTo(-this.radius * 0.5, this.radius * 0.6);
+                ctx.closePath();
                 ctx.fill();
 
             } else if (this.type === 'bubble') {
@@ -2923,16 +3864,34 @@
                 ctx.fill();
 
             } else if (this.type === 'hydro_pump') {
-                // 하이드로펌프 위력 300으로 버프된 거대 물대포 연출
+                // 거북왕 스타일 초고압 수류 빔 & 회전 토네이도 링 연출
                 ctx.globalCompositeOperation = 'lighter';
                 ctx.rotate(this.angle);
-                const grad = ctx.createLinearGradient(-this.radius * 2.2, 0, this.radius * 2.2, 0);
-                grad.addColorStop(0, 'rgba(0, 229, 255, 0)');
-                grad.addColorStop(0.35, '#ffffff');
-                grad.addColorStop(0.7, '#00b0ff');
-                grad.addColorStop(1, '#0091ea');
+
+                // 고압 수류 메인 빔 (백색 코어 + 푸른빛 수류)
+                const grad = ctx.createLinearGradient(-this.radius * 2.5, 0, this.radius * 2.5, 0);
+                grad.addColorStop(0, 'rgba(0, 229, 255, 0.1)');
+                grad.addColorStop(0.2, 'rgba(128, 222, 234, 0.85)');
+                grad.addColorStop(0.5, '#ffffff');
+                grad.addColorStop(0.8, '#00b0ff');
+                grad.addColorStop(1, '#0277bd');
                 ctx.fillStyle = grad;
-                ctx.fillRect(-this.radius * 2.2, -this.radius, this.radius * 4.4, this.radius * 2.0);
+                ctx.beginPath();
+                ctx.ellipse(0, 0, this.radius * 2.4, this.radius * 0.95, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 초고압 나선 회전 수류 링
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.92)';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.ellipse(this.radius * 0.4, 0, this.radius * 0.6, this.radius * 1.2, 0, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.strokeStyle = 'rgba(0, 229, 255, 0.8)';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.ellipse(-this.radius * 0.6, 0, this.radius * 0.5, this.radius * 1.1, 0, 0, Math.PI * 2);
+                ctx.stroke();
 
             } else if (this.type === 'thunderbolt') {
                 // 백만볼트 초고속 전격 화살 (다른 평타보다 빠름)
@@ -3515,6 +4474,60 @@
             this.cooldowns = { attack: 0, q: 0, e: 0, r: 0, f: 0 };
             this.maxCooldowns = { attack: 0.32, q: 5.5, e: 6.5, r: 8.5, f: 11.0 };
 
+            // 체급 분류: 소형(피카츄,파이리,꼬부기,이상해씨), 중형(스라크,루카리오), 대형(롱스톤)
+            this.sizeCategory = (this.species === 'onix') ? 'large' : ((this.species === 'scyther' || this.species === 'lucario' || this.species === 'blaziken') ? 'medium' : 'small');
+
+            // 롱스톤 전용 스탯 (체절형 거대 바위 뱀, 넉백 무효 슈퍼아머, 체력 2000, 약간 느림)
+            if (this.species === 'onix') {
+                this.maxHp = 2000;
+                this.hp = this.maxHp;
+                this.radius = 45;
+                this.baseSpeed = 4.2;
+                this.sprintSpeed = 6.8;
+                this.maxCooldowns = { attack: 0.38, q: 6.5, e: 6.5, r: 8.5, f: 12.0 };
+                this.initOnixSegments();
+            }
+
+            // 번치코 전용 스탯 (중형 포켓몬, 빠르다! 불/격투 스피드 파이터, 체력 1000)
+            if (this.species === 'blaziken') {
+                this.maxHp = 1000;
+                this.hp = this.maxHp;
+                this.radius = 28;
+                this.baseSpeed = 6.2;
+                this.sprintSpeed = 10.2;
+                this.maxCooldowns = { attack: 0.28, q: 4.5, e: 8.5, r: 10.0, f: 12.0 };
+            }
+            this.blazeKickStep = 0;
+            this.kneeStrikeTimer = 0;
+            this.bounceState = 'none'; // 'airborne', 'falling', 'none'
+            this.bounceTimer = 0;
+            this.bounceTargetX = 0;
+            this.bounceTargetY = 0;
+            this.closeCombatTimer = 0;
+            this.closeCombatHits = 0;
+            this.closeCombatTarget = null;
+            this.defenseDownTimer = 0; // 인파이트 후 5초간 받는 피해 1.5배 디버프
+            this.flareBlitzTimer = 0;
+            this.flareBlitzVx = 0;
+            this.flareBlitzVy = 0;
+            this.burnTimer = 0;
+            this.burnAttacker = null;
+            this.burrowTimer = 0;
+            this.burrowMaxTimer = 0;
+            this.burrowHitCooldown = 0;
+            this.burrowVx = 0;
+            this.burrowVy = 0;
+            this.headbuttTimer = 0;
+            this.earthquakeStep = 0;
+            this.earthquakeStepTimer = 0;
+            this.bindTimer = 0;
+            this.bindAngle = 0;
+            this.boundVictim = null;
+            this.boundBy = null;
+            this.qteKey = '';
+            this.qteHitsNeeded = 5;
+            this.qteHitsCurrent = 0;
+
             // 피카츄 전용 스탯 및 타이머
             if (this.species === 'pikachu') {
                 this.baseSpeed = 5.6; // 민첩한 전기 쥐 포켓몬
@@ -3546,6 +4559,342 @@
             this.walkFrame = 0;
             this.aiFocusTarget = null;
             this.aiTargetTimer = 0;
+        }
+
+        // [롱스톤 멀티 세그먼트 암석 뱀 초기화]
+        initOnixSegments() {
+            this.segments = [];
+            const numSegments = 11; // 머리 1개 + 몸통 9개 + 꼬리 끝 1개
+            const segmentConfigs = [
+                { radius: 44, drawR: 44, type: 'head' },
+                { radius: 40, drawR: 40, type: 'body' },
+                { radius: 38, drawR: 38, type: 'body' },
+                { radius: 36, drawR: 36, type: 'body' },
+                { radius: 34, drawR: 34, type: 'body' },
+                { radius: 32, drawR: 32, type: 'body' },
+                { radius: 30, drawR: 30, type: 'body' },
+                { radius: 28, drawR: 28, type: 'body' },
+                { radius: 25, drawR: 25, type: 'body' },
+                { radius: 22, drawR: 22, type: 'body' },
+                { radius: 18, drawR: 18, type: 'tail' }
+            ];
+            for (let i = 0; i < numSegments; i++) {
+                const cfg = segmentConfigs[i];
+                const vertices = [];
+                const numPts = (cfg.type === 'head') ? 10 : 8;
+                for (let p = 0; p < numPts; p++) {
+                    const a = (p / numPts) * Math.PI * 2;
+                    const rJitter = 1 + (Math.sin(p * 2.3 + i * 1.7) * 0.12) + (p % 2 === 0 ? 0.08 : -0.06);
+                    vertices.push({
+                        x: Math.cos(a) * cfg.drawR * rJitter,
+                        y: Math.sin(a) * cfg.drawR * rJitter
+                    });
+                }
+                this.segments.push({
+                    x: this.x - i * 28,
+                    y: this.y,
+                    angle: this.aimAngle,
+                    radius: cfg.radius,
+                    drawR: cfg.drawR,
+                    type: cfg.type,
+                    index: i,
+                    vertices: vertices
+                });
+            }
+        }
+
+        // [롱스톤 모든 돌 세그먼트 히트박스 판정 - 몸통 어느 곳에 맞아도 대미지 입음]
+        isHitByCircle(cx, cy, cradius) {
+            if (this.species === 'onix' && this.segments && this.segments.length > 0) {
+                // 구멍파기 잠복 중에는 피격 면역
+                if (this.state === 'burrowed') return false;
+                for (const seg of this.segments) {
+                    const d = Math.hypot(seg.x - cx, seg.y - cy);
+                    if (d <= seg.radius + cradius) return true;
+                }
+            }
+            return Math.hypot(this.x - cx, this.y - cy) <= this.radius + cradius;
+        }
+
+        // [롱스톤 세그먼트 위치 및 모션 업데이트 (Follow-the-leader Kinematics & Wave)]
+        updateOnixSegments(opponent) {
+            if (this.species !== 'onix') return;
+            if (!this.segments || this.segments.length === 0) this.initOnixSegments();
+
+            // 1. 머리 세그먼트(0번) 위치 바인딩
+            let headX = this.x;
+            let headY = this.y;
+            let headAng = this.aimAngle;
+
+            // 평타 박치기 모션 시 머리 당김/내려찍기 오프셋
+            if (this.headbuttTimer > 0) {
+                const prog = this.headbuttTimer / 16;
+                const offset = (prog > 0.5) ? -Math.sin((prog - 0.5) * Math.PI * 2) * 32 : Math.sin(prog * Math.PI * 2) * 52;
+                headX += Math.cos(this.aimAngle) * offset;
+                headY += Math.sin(this.aimAngle) * offset;
+            }
+
+            this.segments[0].x = headX;
+            this.segments[0].y = headY;
+            this.segments[0].angle = headAng;
+
+            // 2. 조이기(Bind) 시전 중: 유튜브 쇼츠 피카츄 조이기 명장면!
+            // 롱스톤의 바위 몸통들이 피해자 주위를 1단, 2단, 3단 나선 원통 탑(Spiral Tower)으로 층층이 감아올리고
+            // 롱스톤의 머리(0번)가 바로 위에서 피카츄를 매섭게 내려다보는 압도적 똬리 연출!
+            if (this.state === 'binding' && this.boundVictim && this.boundVictim.isAlive) {
+                const vic = this.boundVictim;
+                this.bindAngle = (this.bindAngle || 0) + 0.08;
+
+                // 조이기 으드득 펄스 (매 20프레임마다 똬리가 꽉 조여듦)
+                const squeezePulse = Math.sin((this.bindTimer || 0) * 0.3) * 6;
+                const baseCoilR = 48 + squeezePulse;
+
+                // 머리(0번 세그먼트): 피카츄 바로 위에서 피카츄를 정면으로 내려다봄
+                this.segments[0].x = vic.x;
+                this.segments[0].y = vic.y - 52 - squeezePulse * 0.5;
+                this.segments[0].angle = Math.PI / 2; // 아래를 응시
+
+                // 몸통 세그먼트들: 피카츄를 층층이 감아올리는 나선 탑
+                for (let i = 1; i < this.segments.length; i++) {
+                    const seg = this.segments[i];
+                    // 나선 회전 각도 및 층위 높이
+                    const layer = Math.floor(i / 3.5); // 0, 1, 2층
+                    const segAng = this.bindAngle + (i * 0.75);
+                    const layerYOffset = (layer === 0 ? 16 : (layer === 1 ? 0 : -20));
+                    const r = baseCoilR + (i % 3) * 5;
+
+                    const targetX = vic.x + Math.cos(segAng) * r;
+                    const targetY = vic.y + Math.sin(segAng) * (r * 0.65) + layerYOffset;
+
+                    seg.x += (targetX - seg.x) * 0.42;
+                    seg.y += (targetY - seg.y) * 0.42;
+                    seg.angle = segAng + Math.PI / 2;
+                }
+                return;
+            }
+
+            // 3. 일반 이동 및 대기: 앞선 돌을 순서대로 따라오는 뱀 형태 Kinematics
+            const spd = Math.hypot(this.vx, this.vy);
+            const isMoving = spd > 0.3;
+
+            for (let i = 1; i < this.segments.length; i++) {
+                const prev = this.segments[i - 1];
+                const curr = this.segments[i];
+
+                const dx = curr.x - prev.x;
+                const dy = curr.y - prev.y;
+                let ang = Math.atan2(dy, dx);
+                const targetDist = 28; // 마디 간격
+
+                // 뱀처럼 구불거리는 파동 모션
+                const waveAmp = isMoving ? 3.8 : 1.8;
+                const waveFreq = isMoving ? 0.22 : 0.05;
+                const wave = Math.sin((this.animTick || 0) * waveFreq - i * 0.65) * waveAmp;
+
+                const perpAng = ang + Math.PI / 2;
+                curr.x = prev.x + Math.cos(ang) * targetDist + Math.cos(perpAng) * wave;
+                curr.y = prev.y + Math.sin(ang) * targetDist + Math.sin(perpAng) * wave;
+                curr.angle = ang;
+            }
+        }
+
+        // [구멍파기: 전광석화처럼 타겟 방향으로 꺾이면서 고속 돌진, 롱스톤 본체 은폐, 솟아오른 흙더미 렌더링, 오직 얼굴 돌에만 대미지]
+        updateBurrow(opponent) {
+            this.burrowTimer--;
+            if (this.burrowHitCooldown > 0) this.burrowHitCooldown--;
+
+            // 지하 잠복: 일반 공격 완전 면역 (지진에만 피격됨)
+            this.invincibleTimer = 3;
+
+            // 1. 전광석화처럼 타겟 방향으로 실시간 꺾임 (Steering / Direction Bending)
+            const target = (this.isAI && this.aiFocusTarget && this.aiFocusTarget.isAlive) ? this.aiFocusTarget : opponent;
+            const targetX = this.isAI ? (target ? target.x : this.x) : mouse.x;
+            const targetY = this.isAI ? (target ? target.y : this.y) : mouse.y;
+            const desiredAng = Math.atan2(targetY - this.y, targetX - this.x);
+
+            let diff = desiredAng - this.aimAngle;
+            while (diff < -Math.PI) diff += Math.PI * 2;
+            while (diff > Math.PI) diff -= Math.PI * 2;
+
+            // 전광석화 스타일의 날카로운 궤적 꺾임 (각속도 0.16)
+            this.aimAngle += diff * 0.16;
+
+            const digSpeed = 16.5;
+            this.burrowVx = Math.cos(this.aimAngle) * digSpeed;
+            this.burrowVy = Math.sin(this.aimAngle) * digSpeed;
+            this.vx = this.burrowVx;
+            this.vy = this.burrowVy;
+            this.x += this.vx;
+            this.y += this.vy;
+
+            // 경기장 벽 경계 체크
+            this.x = Math.max(FIELD_MIN_X + 40, Math.min(FIELD_MAX_X - 40, this.x));
+            this.y = Math.max(FIELD_MIN_Y + 40, Math.min(FIELD_MAX_Y - 40, this.y));
+
+            // 세그먼트 위치 갱신 (몸통 세그먼트들이 꺾인 궤적을 뱀처럼 매끄럽게 따라옴)
+            this.updateOnixSegments(opponent);
+
+            // 2. 바닥 흙먼지와 지면 균열 파티클
+            if (Math.random() < 0.7) {
+                particles.push(new Particle(
+                    this.x + (Math.random() - 0.5) * 36,
+                    this.y + (Math.random() - 0.5) * 26,
+                    -this.vx * 0.15 + (Math.random() - 0.5) * 2,
+                    -this.vy * 0.15 - Math.random() * 3 - 1,
+                    Math.random() < 0.5 ? '#795548' : '#8d6e63',
+                    Math.random() * 8 + 4,
+                    22,
+                    'smoke'
+                ));
+            }
+            if (this.burrowTimer % 6 === 0) {
+                addGroundDecal(this.x, this.y, 36, 'crater');
+            }
+
+            // 3. 관통 충돌 판정: ★오직 얼굴 쪽(머리 돌, segments[0])에 닿은 적에게만 대미지 & 밀치기!★
+            const headSeg = (this.segments && this.segments.length > 0) ? this.segments[0] : { x: this.x, y: this.y, radius: 42 };
+            const targets = [opponent, ...(typeof scytherClones !== 'undefined' ? scytherClones : [])].filter(c => c && c.isAlive && c !== this);
+
+            for (const t of targets) {
+                const d = Math.hypot(t.x - headSeg.x, t.y - headSeg.y);
+                if (d < headSeg.radius + t.radius + 12) {
+                    if (this.burrowHitCooldown <= 0) {
+                        const bumpAng = Math.atan2(t.y - headSeg.y, t.x - headSeg.x);
+                        // 오직 머리 바위 충돌로 인한 48 피해 & 밀쳐짐
+                        t.takeDamage(48, this, false, Math.cos(bumpAng) * 16, Math.sin(bumpAng) * 16);
+                        if (typeof sfx !== 'undefined' && sfx.playRockSmash) sfx.playRockSmash();
+                        triggerScreenShake(6);
+                        this.burrowHitCooldown = 22;
+                        showAlert('⛏️ 구멍파기 돌파 강타 (얼굴 바위 충돌)!');
+                        for (let p = 0; p < 12; p++) {
+                            const a = bumpAng + (Math.random() - 0.5) * 1.2;
+                            const spd = Math.random() * 6 + 3;
+                            particles.push(new Particle(headSeg.x, headSeg.y, Math.cos(a) * spd, Math.sin(a) * spd, '#8d6e63', 6, 18, 'spark'));
+                        }
+                    }
+                }
+            }
+
+            // 4. 시간 종료 시 지면 솟구침
+            if (this.burrowTimer <= 0) {
+                this.emergeFromBurrow(opponent);
+            }
+        }
+
+        emergeFromBurrow(opponent) {
+            this.state = 'idle';
+            this.invincibleTimer = 0;
+            if (typeof sfx !== 'undefined') {
+                if (sfx.playTackle) sfx.playTackle();
+                if (sfx.playRockSmash) sfx.playRockSmash();
+            }
+            triggerScreenShake(15);
+            addGroundDecal(this.x, this.y, 75, 'crater');
+            addGroundFissure(this.x, this.y, 180, 5);
+            showAlert('💥 롱스톤 땅속에서 솟구침 (DIG EMERGE)!');
+
+            const splashRange = 185;
+            const targets = [opponent, ...(typeof scytherClones !== 'undefined' ? scytherClones : [])].filter(c => c && c.isAlive && c !== this);
+            for (const t of targets) {
+                const d = Math.hypot(t.x - this.x, t.y - this.y);
+                if (d <= splashRange + t.radius) {
+                    const kbAng = Math.atan2(t.y - this.y, t.x - this.x);
+                    t.takeDamage(95, this, true, Math.cos(kbAng) * 20, Math.sin(kbAng) * 20);
+                }
+            }
+            for (let i = 0; i < 28; i++) {
+                const a = Math.random() * Math.PI * 2;
+                const spd = Math.random() * 9 + 4;
+                particles.push(new Particle(this.x, this.y, Math.cos(a) * spd, Math.sin(a) * spd - 3, '#8d6e63', Math.random() * 9 + 4, 28));
+            }
+        }
+
+        updateBinding(opponent) {
+            if (!this.boundVictim || !this.boundVictim.isAlive) {
+                this.releaseBind(false);
+                return;
+            }
+            const victim = this.boundVictim;
+            this.bindTimer--;
+
+            this.vx = 0;
+            this.vy = 0;
+            victim.vx = 0;
+            victim.vy = 0;
+            victim.state = 'bound';
+
+            // 애니 원작 피카츄 조이기: 롱스톤의 모든 몸통 돌들이 희생자를 둥글게 에워싸는 똬리 궤도 유지
+            if (this.species === 'onix') {
+                this.updateOnixSegments(opponent);
+            }
+
+            // 매 20틱(약 0.33초)마다 지속 피해 (DoT)
+            if (this.bindTimer % 20 === 0) {
+                victim.takeDamage(16, this, false, 0, 0, true);
+                if (typeof sfx !== 'undefined' && sfx.playHit) sfx.playHit();
+                triggerScreenShake(2);
+                for (let i = 0; i < 4; i++) {
+                    const a = Math.random() * Math.PI * 2;
+                    particles.push(new Particle(
+                        victim.x + Math.cos(a) * 20,
+                        victim.y + Math.sin(a) * 20,
+                        Math.cos(a) * 2, Math.sin(a) * 2,
+                        '#b0bec5', Math.random() * 5 + 2, 16
+                    ));
+                }
+            }
+
+            // AI victim 인 경우 자동 탈출 시도
+            if (victim.isAI) {
+                const cfg = (typeof DIFFICULTY_SETTINGS !== 'undefined' && DIFFICULTY_SETTINGS[currentDifficulty]) || {};
+                if (cfg.id !== 'sandbag') {
+                    const escapeChance = (cfg.id === 'hell') ? 0.08 : ((cfg.id === 'hard') ? 0.05 : ((cfg.id === 'normal') ? 0.03 : 0.015));
+                    if (Math.random() < escapeChance) {
+                        this.qteHitsCurrent++;
+                        if (this.qteHitsCurrent >= this.qteHitsNeeded) {
+                            this.releaseBind(true);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            if (this.bindTimer <= 0) {
+                this.releaseBind(false);
+            }
+        }
+
+        releaseBind(escapedByQte = false) {
+            if (this.boundVictim) {
+                this.boundVictim.boundBy = null;
+                this.boundVictim.state = 'idle';
+                if (escapedByQte) {
+                    showAlert('💥 조이기 탈출 성공!');
+                    if (typeof sfx !== 'undefined' && sfx.playTackle) sfx.playTackle();
+                    const ang = Math.atan2(this.boundVictim.y - this.y, this.boundVictim.x - this.x);
+                    this.boundVictim.vx = Math.cos(ang) * 8;
+                    this.boundVictim.vy = Math.sin(ang) * 8;
+                    triggerScreenShake(6);
+                }
+            }
+            this.boundVictim = null;
+            this.state = 'idle';
+            this.qteKey = '';
+            this.qteHitsCurrent = 0;
+        }
+
+        onQteHit(victim) {
+            if (this.state !== 'binding' || this.boundVictim !== victim) return;
+            this.qteHitsCurrent++;
+            if (typeof sfx !== 'undefined' && sfx.playHit) sfx.playHit();
+            triggerScreenShake(3);
+            for (let i = 0; i < 5; i++) {
+                const a = Math.random() * Math.PI * 2;
+                particles.push(new Particle(victim.x, victim.y, Math.cos(a) * 4, Math.sin(a) * 4, '#ffeb3b', Math.random() * 6 + 3, 14, 'spark'));
+            }
+            if (this.qteHitsCurrent >= this.qteHitsNeeded) {
+                this.releaseBind(true);
+            }
         }
 
         plantBoneRushAnchor(x, y) {
@@ -3593,9 +4942,335 @@
             return this.aiFocusTarget || opponent;
         }
 
+
+        // [번치코 E스킬: 뛰어오르기 - 3초간 공중 무적 체공, 파란 원 표시 후 3초 뒤 내려찍기 급강하 140 에어본]
+        updateBounce(opponent) {
+            this.bounceTimer--;
+            this.invincibleTimer = 3; // 공중 체공 동안 완전 무적
+
+            // 공중 체공 중 방향키/WASD로 자유 이동 가능!
+            if (this.bounceState === 'airborne') {
+                if (this === p1) {
+                    let moveX = 0; let moveY = 0;
+                    if (keys['w'] || keys['ArrowUp']) moveY -= 1;
+                    if (keys['s'] || keys['ArrowDown']) moveY += 1;
+                    if (keys['a'] || keys['ArrowLeft']) moveX -= 1;
+                    if (keys['d'] || keys['ArrowRight']) moveX += 1;
+                    if (moveX !== 0 || moveY !== 0) {
+                        const len = Math.hypot(moveX, moveY);
+                        const airSpeed = 8.5; // 공중 기동 속도
+                        this.bounceTargetX += (moveX / len) * airSpeed;
+                        this.bounceTargetY += (moveY / len) * airSpeed;
+                    }
+                } else if (this.isAI) {
+                    const aiTarget = this.getAITarget(opponent);
+                    if (aiTarget) {
+                        const dx = aiTarget.x - this.bounceTargetX;
+                        const dy = aiTarget.y - this.bounceTargetY;
+                        const dist = Math.hypot(dx, dy);
+                        if (dist > 10) {
+                            const airSpeed = 5.5;
+                            this.bounceTargetX += (dx / dist) * Math.min(dist, airSpeed);
+                            this.bounceTargetY += (dy / dist) * Math.min(dist, airSpeed);
+                        }
+                    }
+                }
+
+                // 경기장 내부로 제한
+                this.bounceTargetX = Math.max(FIELD_MIN_X + 50, Math.min(FIELD_MAX_X - 50, this.bounceTargetX));
+                this.bounceTargetY = Math.max(FIELD_MIN_Y + 50, Math.min(FIELD_MAX_Y - 50, this.bounceTargetY));
+                this.x = this.bounceTargetX;
+                this.y = this.bounceTargetY;
+                this.vx = 0;
+                this.vy = 0;
+
+                // 비행 궤적 공중 스파크 파티클
+                if (this.bounceTimer % 2 === 0) {
+                    particles.push(new Particle(
+                        this.bounceTargetX + (Math.random() - 0.5) * 35,
+                        this.bounceTargetY + (Math.random() - 0.5) * 35,
+                        (Math.random() - 0.5) * 2, -Math.random() * 2 - 1,
+                        '#00e5ff', Math.random() * 5 + 3, 16, 'spark'
+                    ));
+                }
+            }
+
+            // 낙하 15프레임 전부터 급강하 돌입
+            if (this.bounceTimer <= 15 && this.bounceState === 'airborne') {
+                this.bounceState = 'falling';
+                this.x = this.bounceTargetX;
+                this.y = this.bounceTargetY;
+            }
+
+            // 3초(180프레임) 경과 시 지면 강타 폭발!
+            if (this.bounceTimer <= 0) {
+                this.bounceState = 'none';
+                this.x = this.bounceTargetX;
+                this.y = this.bounceTargetY;
+                this.state = 'idle';
+
+                triggerScreenShake(20);
+                addGroundDecal(this.x, this.y, 65, 'crater');
+                if (typeof sfx !== 'undefined') {
+                    if (sfx.playExplosion) sfx.playExplosion();
+                    if (sfx.playTackle) sfx.playTackle();
+                }
+                showAlert('💥 번치코 뛰어오르기 급강하 강타! (140 DMG & 에어본)! 💥');
+
+                const hitR = 220;
+                const targets = [opponent, ...(typeof scytherClones !== 'undefined' ? scytherClones : [])].filter(c => c && c.isAlive && c !== this);
+                for (const t of targets) {
+                    const d = Math.hypot(t.x - this.x, t.y - this.y);
+                    if (d <= hitR + t.radius) {
+                        const kbAng = Math.atan2(t.y - this.y, t.x - this.x);
+                        t.takeDamage(140, this, true, Math.cos(kbAng) * 22, Math.sin(kbAng) * 22);
+                        t.state = 'knockdown';
+                        t.stateTimer = 28;
+                    }
+                }
+
+                for (let i = 0; i < 35; i++) {
+                    const a = Math.random() * Math.PI * 2;
+                    const spd = Math.random() * 10 + 3;
+                    particles.push(new Particle(this.x, this.y, Math.cos(a) * spd, Math.sin(a) * spd - 4, Math.random() < 0.5 ? '#ff5722' : '#29b6f6', Math.random() * 9 + 4, 30, 'flame'));
+                }
+            }
+        }
+
+        // [번치코 R스킬: 인파이트 - 펀치 6연타 후 어퍼컷 띄우기, 시전 후 5초간 받는 대미지 1.5배 디버프]
+        updateCloseCombat(opponent) {
+            this.closeCombatTimer--;
+            this.vx *= 0.4;
+            this.vy *= 0.4;
+
+            const target = (this.closeCombatTarget && this.closeCombatTarget.isAlive) ? this.closeCombatTarget : opponent;
+            if (target && target.isAlive) {
+                // 상대를 향해 바짝 붙음
+                const ang = Math.atan2(target.y - this.y, target.x - this.x);
+                this.aimAngle = ang;
+                this.x += Math.cos(ang) * 2.5;
+                this.y += Math.sin(ang) * 2.5;
+
+                // 매 4프레임마다 연타 펀치 (총 6타)
+                if (this.closeCombatTimer > 10 && this.closeCombatTimer % 4 === 0 && this.closeCombatHits < 6) {
+                    this.closeCombatHits++;
+                    target.takeDamage(16, this, false, Math.cos(ang) * 2, Math.sin(ang) * 2);
+                    if (typeof sfx !== 'undefined' && sfx.playBulletPunch) sfx.playBulletPunch();
+                    triggerScreenShake(3.5);
+
+                    // 펀치 화염 잔상 파티클
+                    const spread = (Math.random() - 0.5) * 25;
+                    particles.push(new Particle(
+                        target.x + Math.cos(ang + Math.PI/2) * spread,
+                        target.y + Math.sin(ang + Math.PI/2) * spread,
+                        Math.cos(ang) * 4, Math.sin(ang) * 4,
+                        '#ff9100', 8, 12, 'spark'
+                    ));
+                }
+
+                // 마지막 7타째 강력한 불꽃 어퍼컷 (10프레임 시점)
+                if (this.closeCombatTimer === 8) {
+                    this.closeCombatHits++;
+                    target.takeDamage(85, this, true, Math.cos(ang) * 18, -20);
+                    target.state = 'knockdown';
+                    target.stateTimer = 35;
+                    if (typeof sfx !== 'undefined' && sfx.playHit) sfx.playHit();
+                    triggerScreenShake(14);
+                    showAlert('🥊 번치코 인파이트 블레이즈 어퍼컷 강타!! 🥊');
+
+                    for (let p = 0; p < 22; p++) {
+                        const a = -Math.PI / 2 + (Math.random() - 0.5) * 1.0;
+                        const spd = Math.random() * 9 + 4;
+                        particles.push(new Particle(target.x, target.y, Math.cos(a) * spd, Math.sin(a) * spd, '#ff3d00', 9, 22, 'flame'));
+                    }
+                }
+            }
+
+            if (this.closeCombatTimer <= 0) {
+                this.state = 'idle';
+                this.defenseDownTimer = 300; // 5초간 받는 피해 1.5배 디버프 적용!
+                showAlert('⚠️ 인파이트 반동: 5초간 받는 대미지 1.5배 증가! ⚠️');
+            }
+        }
+
+        // [번치코 F스킬: 플레어드라이브 - 전신 화염 불새 돌진, 160 대미지, 자신 45 반동, 상대 7초 화상 DoT]
+        updateFlareBlitz(opponent) {
+            this.flareBlitzTimer--;
+            this.vx = this.flareBlitzVx;
+            this.vy = this.flareBlitzVy;
+
+            const prevX = this.x;
+            const prevY = this.y;
+            this.x += this.vx;
+            this.y += this.vy;
+
+            // 경기장 경계 체크
+            if (this.x < FIELD_MIN_X) { this.x = FIELD_MIN_X; this.flareBlitzTimer = 0; }
+            if (this.x > FIELD_MAX_X) { this.x = FIELD_MAX_X; this.flareBlitzTimer = 0; }
+            if (this.y < FIELD_MIN_Y) { this.y = FIELD_MIN_Y; this.flareBlitzTimer = 0; }
+            if (this.y > FIELD_MAX_Y) { this.y = FIELD_MAX_Y; this.flareBlitzTimer = 0; }
+
+            // 돌진 궤적 거대 화염 파티클
+            for (let i = 0; i < 4; i++) {
+                particles.push(new Particle(
+                    this.x + (Math.random() - 0.5) * 28,
+                    this.y + (Math.random() - 0.5) * 28,
+                    -this.vx * 0.2 + (Math.random() - 0.5) * 3,
+                    -this.vy * 0.2 + (Math.random() - 0.5) * 3,
+                    Math.random() < 0.6 ? '#ff1744' : '#ffeb3b',
+                    Math.random() * 10 + 5,
+                    20,
+                    'flame'
+                ));
+            }
+
+            // 충돌 판정 대상 (상대 플레이어, AI, 분신 모두 포함)
+            const targets = [opponent, (this === p1 ? p2 : p1), ...(typeof scytherClones !== 'undefined' ? scytherClones : [])].filter((c, idx, arr) => c && c.isAlive && c !== this && arr.indexOf(c) === idx);
+            for (const t of targets) {
+                // 초고속 이동(22px/frame) 시 관통 방지를 위한 선분 투영 거리 체크 (Swept Collision)
+                const segDx = this.x - prevX;
+                const segDy = this.y - prevY;
+                const segLenSq = segDx * segDx + segDy * segDy;
+                let d = Math.hypot(t.x - this.x, t.y - this.y);
+                if (segLenSq > 0) {
+                    const u = Math.max(0, Math.min(1, ((t.x - prevX) * segDx + (t.y - prevY) * segDy) / segLenSq));
+                    const projX = prevX + u * segDx;
+                    const projY = prevY + u * segDy;
+                    d = Math.hypot(t.x - projX, t.y - projY);
+                }
+
+                if (d <= this.radius + (t.radius || 30) + 35) {
+                    // 적중 시 대폭발!
+                    const kbAng = Math.atan2(t.y - this.y, t.x - this.x);
+                    t.takeDamage(160, this, true, Math.cos(kbAng) * 24, Math.sin(kbAng) * 24);
+                    t.applyBurn(this, 420, 12); // 상대 7초간 화상 부여
+
+                    // 번치코 자신도 45 반동 피해!
+                    this.takeDamage(45, this, false, -Math.cos(kbAng) * 6, -Math.sin(kbAng) * 6, true);
+
+                    triggerScreenShake(22);
+                    addGroundDecal(this.x, this.y, 65, 'scorch');
+                    if (typeof sfx !== 'undefined' && sfx.playExplosion) sfx.playExplosion();
+                    showAlert('🔥 플레어드라이브 대폭발 강타! (자신 반동 45, 상대 7초 화상!) 🔥');
+
+                    for (let p = 0; p < 35; p++) {
+                        const a = Math.random() * Math.PI * 2;
+                        const spd = Math.random() * 11 + 3;
+                        particles.push(new Particle(this.x, this.y, Math.cos(a) * spd, Math.sin(a) * spd, '#ff3d00', Math.random() * 10 + 5, 28, 'flame'));
+                    }
+
+                    this.state = 'idle';
+                    this.flareBlitzTimer = 0;
+                    this.vx = 0;
+                    this.vy = 0;
+                    return;
+                }
+            }
+
+            if (this.flareBlitzTimer <= 0) {
+                this.state = 'idle';
+                this.vx = 0;
+                this.vy = 0;
+            }
+        }
+
         update(opponent) {
             if (!this.isAlive) return;
             this.animTick++;
+
+            // 스톤에지 바위와의 충돌 판정 (길을 막는 장애물)
+            if (typeof stoneRocks !== 'undefined') {
+                for (const rock of stoneRocks) {
+                    if (!rock || !rock.isAlive) continue;
+                    const d = Math.hypot(this.x - rock.x, this.y - rock.y);
+                    const minDist = this.radius + rock.radius;
+                    if (d < minDist && d > 0.001) {
+                        const push = minDist - d;
+                        const nx = (this.x - rock.x) / d;
+                        const ny = (this.y - rock.y) / d;
+                        this.x += nx * push;
+                        this.y += ny * push;
+                        const dot = this.vx * nx + this.vy * ny;
+                        if (dot < 0) {
+                            this.vx -= dot * nx;
+                            this.vy -= dot * ny;
+                        }
+                    }
+                }
+            }
+
+            // 롱스톤 상태 제어
+            if (this.state === 'burrowed') {
+                this.updateBurrow(opponent);
+                return;
+            }
+
+            // 롱스톤 지진 2타 ('탁 탁') 타이머 업데이트
+            if (this.earthquakeStepTimer > 0) {
+                this.earthquakeStepTimer--;
+                if (this.earthquakeStepTimer === 0 && this.earthquakeStep === 1) {
+                    // 2타 발동 ("탁!")
+                    this.earthquakeStep = 2;
+                    this.attackMotionTimer = 18;
+                    if (typeof sfx !== 'undefined' && sfx.playEarthquake) sfx.playEarthquake();
+                    triggerScreenShake(16);
+                    addGroundFissure(this.x, this.y, 420, 7);
+                    showAlert('🌋 지진 2타 강타 (탁-탁)!');
+                    groundEffects.push(new EarthquakeShockwave(this.x, this.y, this, 420, 42, 85));
+                }
+            }
+
+            // 롱스톤 세그먼트 위치 업데이트
+            if (this.species === 'onix') {
+                this.updateOnixSegments(opponent);
+            }
+
+            // 번치코 방어력 감소 디버프 (인파이트 후 5초) 타이머
+            if (this.defenseDownTimer > 0) this.defenseDownTimer--;
+
+            // 화상 상태이상 타이머 (7초 지속 DoT 피해)
+            if (this.burnTimer > 0) {
+                this.burnTimer--;
+                if (this.burnTimer % 60 === 0 && this.isAlive) {
+                    this.takeDamage(this.burnDmg || 12, this.burnAttacker || this, false, 0, 0, true);
+                    if (typeof sfx !== 'undefined' && sfx.playHit) sfx.playHit();
+                    damageTexts.push(new DamageText(this.x, this.y - 18, '🔥 화상 피해!', '#ff5722', false));
+                }
+                if (Math.random() < 0.45) {
+                    particles.push(new Particle(
+                        this.x + (Math.random() - 0.5) * 20,
+                        this.y + (Math.random() - 0.5) * 20,
+                        (Math.random() - 0.5) * 2, -Math.random() * 2 - 1,
+                        '#ff5722', Math.random() * 6 + 3, 16, 'flame'
+                    ));
+                }
+            }
+
+            // 번치코 전용 상태 제어
+            if (this.state === 'bounce_airborne' || this.bounceState === 'airborne' || this.bounceState === 'falling') {
+                this.updateBounce(opponent);
+                return;
+            }
+            if (this.state === 'close_combat') {
+                this.updateCloseCombat(opponent);
+                return;
+            }
+            if (this.state === 'flare_blitz') {
+                this.updateFlareBlitz(opponent);
+                return;
+            }
+            if (this.state === 'binding') {
+                this.updateBinding(opponent);
+                return;
+            }
+            if (this.state === 'bound' || this.boundBy) {
+                this.vx = 0;
+                this.vy = 0;
+                return;
+            }
+            if (this.headbuttTimer > 0) {
+                this.headbuttTimer--;
+            }
             if (this.invincibleTimer > 0) this.invincibleTimer--;
             if (this.attackMotionTimer > 0) this.attackMotionTimer--;
 
@@ -3952,15 +5627,25 @@
 
         updateWhirlpool(opponent) {
             this.whirlpoolTimer--;
-            this.shellSpinAngle += 0.7;
+            this.shellSpinAngle += 0.88; // 등껍질 초고속 스핀
             this.vx *= 0.85;
             this.vy *= 0.85;
 
-            const radius = 220;
-            for (let i = 0; i < 5; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const dist = Math.random() * radius;
-                particles.push(new Particle(this.x + Math.cos(angle) * dist, this.y + Math.sin(angle) * dist, -Math.sin(angle) * 8.5, Math.cos(angle) * 8.5, Math.random() < 0.5 ? '#00e5ff' : '#ffffff', Math.random() * 11 + 5, 20, 'circle'));
+            const radius = 230;
+            // 4개 등껍질 구멍에서 나선형으로 분사되는 고속 물줄기 파티클
+            for (let i = 0; i < 4; i++) {
+                const a = this.shellSpinAngle + (i * Math.PI / 2);
+                const spd = 9.5;
+                particles.push(new Particle(
+                    this.x + Math.cos(a) * 22,
+                    this.y + Math.sin(a) * 22,
+                    Math.cos(a) * spd,
+                    Math.sin(a) * spd,
+                    Math.random() < 0.6 ? '#00e5ff' : '#ffffff',
+                    Math.random() * 8 + 4,
+                    22,
+                    'circle'
+                ));
             }
 
             const whirlpoolTargets = [opponent, ...scytherClones.filter(c => c.owner !== this && c.isAlive)];
@@ -3996,25 +5681,40 @@
             this.vx *= 0.55;
             this.vy *= 0.55;
 
-            if (this.flameChannelTimer % 4 === 0) {
-                const streamAngle = this.aimAngle + (Math.random() - 0.5) * 0.2;
-                const spd = Math.random() * 6 + 18;
+            // 리자몽 스타일: 2프레임마다 굵은 화염 분사 (연속 화염 방사 빔)
+            if (this.flameChannelTimer % 2 === 0) {
+                const streamAngle = this.aimAngle + (Math.random() - 0.5) * 0.16;
+                const spd = Math.random() * 6 + 21;
 
                 projectiles.push(new Projectile({
-                    x: this.x + Math.cos(this.aimAngle) * 32,
-                    y: this.y + Math.sin(this.aimAngle) * 32,
+                    x: this.x + Math.cos(this.aimAngle) * 35,
+                    y: this.y + Math.sin(this.aimAngle) * 35,
                     vx: Math.cos(streamAngle) * spd,
                     vy: Math.sin(streamAngle) * spd,
                     speed: spd,
-                    radius: 22,
-                    damage: 12,
+                    radius: 28,
+                    damage: 14,
                     owner: this,
                     type: 'flamethrower',
-                    life: 30,
+                    life: 34,
                     piercing: true,
                     isBlockable: false,
-                    knockback: 1.4
+                    knockback: 1.8
                 }));
+
+                // 총구 화염 및 불꽃 파티클
+                if (Math.random() < 0.8) {
+                    particles.push(new Particle(
+                        this.x + Math.cos(this.aimAngle) * 38,
+                        this.y + Math.sin(this.aimAngle) * 38,
+                        Math.cos(streamAngle) * 6 + (Math.random() - 0.5) * 4,
+                        Math.sin(streamAngle) * 6 + (Math.random() - 0.5) * 4,
+                        Math.random() < 0.5 ? '#ffeb3b' : '#ff5722',
+                        Math.random() * 8 + 4,
+                        18,
+                        'flame'
+                    ));
+                }
             }
 
             if (this.flameChannelTimer % 10 === 0) {
@@ -4356,37 +6056,43 @@
             }
         }
 
-        // --- 스라크 F스킬: 그림자 분신술 (양쪽으로 빠르게 움직이다 분신 5개 소환, 보통급 지능, 시저크로스만 사용 가능, 체력 80) ---
+        // --- 스라크 F스킬: 그림자 분신술 (상대에게 날아가지 않고, 스라크가 서 있는 "그 자리에서" 초고속 잔상을 펼친 후 분신 5기 소환) ---
         updateDoubleTeamMotion(opponent) {
             this.doubleTeamTimer--;
-            // 좌우/전후 초고속 지그재그 분신 잔상 모션
-            const zig = Math.sin(this.doubleTeamTimer * 1.6) * 18;
+
+            // 상대에게 날아가지 않고 "그 자리에서" 초고속 좌우 지그재그 회피 잔상 스텝!
+            const zig = Math.sin(this.doubleTeamTimer * 1.8) * 16;
             this.vx = Math.cos(this.aimAngle + Math.PI / 2) * zig;
             this.vy = Math.sin(this.aimAngle + Math.PI / 2) * zig;
 
-            particles.push(new Particle(
-                this.x + (Math.random() - 0.5) * 30,
-                this.y + (Math.random() - 0.5) * 30,
-                (Math.random() - 0.5) * 6,
-                (Math.random() - 0.5) * 6,
-                Math.random() < 0.5 ? '#b2ff59' : '#ffffff',
-                Math.random() * 8 + 4,
-                12,
-                'spark'
-            ));
+            // 스라크 본체가 있는 "그 자리" 주변을 둘러싸는 6개의 초고속 녹색 분신 잔상 파티클
+            for (let i = 0; i < 6; i++) {
+                const a = (this.doubleTeamTimer * 0.3) + (i * Math.PI * 2 / 6);
+                const r = 45 + Math.sin(this.doubleTeamTimer * 0.2 + i) * 15;
+                particles.push(new Particle(
+                    this.x + Math.cos(a) * r,
+                    this.y + Math.sin(a) * r,
+                    (Math.random() - 0.5) * 3,
+                    (Math.random() - 0.5) * 3,
+                    Math.random() < 0.6 ? '#69f0ae' : '#ffffff',
+                    Math.random() * 8 + 4,
+                    12,
+                    'spark'
+                ));
+            }
 
             if (this.doubleTeamTimer <= 0) {
                 this.vx = 0;
                 this.vy = 0;
                 this.state = 'idle';
-                sfx.playClone();
+                if (typeof sfx !== 'undefined' && sfx.playClone) sfx.playClone();
                 triggerScreenShake(8);
 
-                // 분신 5개 생성 (체력 80, 보통급 지능, 시저크로스만 사용 가능)
+                // 스라크가 있던 바로 "그 자리" 주변 반경 110px에 분신 5개 소환!
                 const numClones = 5;
                 for (let i = 0; i < numClones; i++) {
-                    const spawnAngle = (i * Math.PI * 2) / numClones + Math.random() * 0.2;
-                    const spawnDist = 115;
+                    const spawnAngle = (i * Math.PI * 2) / numClones + Math.random() * 0.15;
+                    const spawnDist = 110;
                     const cx = Math.max(FIELD_MIN_X + 25, Math.min(FIELD_MAX_X - 25, this.x + Math.cos(spawnAngle) * spawnDist));
                     const cy = Math.max(FIELD_MIN_Y + 25, Math.min(FIELD_MAX_Y - 25, this.y + Math.sin(spawnAngle) * spawnDist));
 
@@ -4397,13 +6103,13 @@
                         index: i
                     }));
 
-                    for (let p = 0; p < 10; p++) {
-                        const spd = Math.random() * 5 + 2;
+                    for (let p = 0; p < 12; p++) {
+                        const spd = Math.random() * 6 + 2;
                         const a = Math.random() * Math.PI * 2;
-                        particles.push(new Particle(cx, cy, Math.cos(a) * spd, Math.sin(a) * spd, '#b0bec5', Math.random() * 7 + 4, 18, 'circle'));
+                        particles.push(new Particle(cx, cy, Math.cos(a) * spd, Math.sin(a) * spd, '#b9f6ca', Math.random() * 7 + 4, 20, 'spark'));
                     }
                 }
-                showAlert('👥 그림자 분신술 (5기 소환 완료! 체력 80) 👥');
+                showAlert('👥 그림자 분신술 (제자리 5기 소환 완료!) 👥');
             }
         }
 
@@ -4554,27 +6260,38 @@
                     showAlert('BUBBLE BARRICADE!');
 
                 } else if (slot === 'f') {
-                    // ★ 하이드로펌프 위력 200으로 너프 조정 ★
+                    // ★ 꼬부기 초고압 단일 하이드로펌프 발사 ★
                     this.cooldowns.f = this.maxCooldowns.f;
                     const angle = this.aimAngle;
-                    const spd = 34;
+                    const spd = 38;
+
+                    // 단일 중앙 거대 고압 수류포 (210 대미지, 대구경 관통)
+                    const fx = this.x + Math.cos(angle) * 36;
+                    const fy = this.y + Math.sin(angle) * 36;
                     projectiles.push(new Projectile({
-                        x: this.x + Math.cos(angle) * 35,
-                        y: this.y + Math.sin(angle) * 35,
+                        x: fx, y: fy,
                         vx: Math.cos(angle) * spd,
                         vy: Math.sin(angle) * spd,
                         speed: spd,
-                        radius: 34,
-                        damage: 200, // 위력 200으로 너프!
+                        radius: 44,
+                        damage: 210,
                         owner: this,
                         type: 'hydro_pump',
                         life: 45,
                         piercing: true,
                         isBlockable: false,
-                        knockback: 22
+                        knockback: 25
                     }));
-                    sfx.playWater();
-                    showAlert('🌊 HYDRO PUMP (200 DMG)! 🌊');
+
+                    // 발사 반동으로 꼬부기가 뒤로 밀려남
+                    this.vx = -Math.cos(angle) * 9.0;
+                    this.vy = -Math.sin(angle) * 9.0;
+
+                    triggerScreenShake(18);
+                    if (typeof sfx !== 'undefined' && sfx.playWater) {
+                        sfx.playWater();
+                    }
+                    showAlert('🌊 하이드로펌프 (HYDRO PUMP) 초고압 단일 분사! 🌊');
                 }
 
             } else if (this.species === 'bulbasaur') {
@@ -4950,6 +6667,173 @@
                     sfx.playQuickAttack();
                     showAlert('👥 그림자 분신술 시전 중... 👥');
                 }
+            } else if (this.species === 'blaziken') {
+                if (slot === 'attack') {
+                    // 평타: 블레이즈킥 빠른 불꽃 발차기 연격 (1타, 2타, 3타 연계)
+                    this.cooldowns.attack = this.maxCooldowns.attack;
+                    this.blazeKickStep = (this.blazeKickStep % 3) + 1;
+                    this.attackMotionTimer = 14;
+
+                    const aim = this.aimAngle;
+                    const isFinisher = (this.blazeKickStep === 3);
+                    const reach = isFinisher ? 145 : 120;
+                    const dmg = isFinisher ? 55 : 36;
+
+                    if (typeof sfx !== 'undefined') {
+                        if (sfx.playTackle) sfx.playTackle();
+                    }
+
+                    // 발차기 화염 참격파 파티클
+                    for (let p = 0; p < (isFinisher ? 12 : 7); p++) {
+                        const spread = (Math.random() - 0.5) * (isFinisher ? 1.0 : 0.6);
+                        const spd = Math.random() * 6 + 4;
+                        particles.push(new Particle(
+                            this.x + Math.cos(aim) * 28,
+                            this.y + Math.sin(aim) * 28,
+                            Math.cos(aim + spread) * spd,
+                            Math.sin(aim + spread) * spd,
+                            Math.random() < 0.6 ? '#ff3d00' : '#ffea00',
+                            isFinisher ? 8 : 6,
+                            16,
+                            'flame'
+                        ));
+                    }
+
+                    const targets = [opponent, ...(typeof scytherClones !== 'undefined' ? scytherClones : [])].filter(c => c && c.isAlive && c !== this);
+                    let hitAny = false;
+                    for (const tgt of targets) {
+                        const d = Math.hypot(tgt.x - this.x, tgt.y - this.y);
+                        if (d <= reach + tgt.radius) {
+                            hitAny = true;
+                            const kb = isFinisher ? 16 : 8;
+                            tgt.takeDamage(dmg, this, isFinisher, Math.cos(aim) * kb, Math.sin(aim) * kb);
+                            if (typeof sfx !== 'undefined' && sfx.playHit) sfx.playHit();
+                            triggerScreenShake(isFinisher ? 7 : 3);
+                        }
+                    }
+                    if (isFinisher) showAlert('🔥 블레이즈킥 3연타 피니시 강타! 🔥');
+
+                } else if (slot === 'q') {
+                    // Q: 무릎차기 (타겟 위치로 순간이동 후 강력한 무릎차기, 빗나갈 시 자신 40 반동 피해)
+                    this.cooldowns.q = this.maxCooldowns.q;
+                    this.attackMotionTimer = 16;
+
+                    const aiTarget = (this.isAI && this.aiFocusTarget && this.aiFocusTarget.isAlive) ? this.aiFocusTarget : opponent;
+                    const rawTargetX = this.isAI ? aiTarget.x : mouse.x;
+                    const rawTargetY = this.isAI ? aiTarget.y : mouse.y;
+
+                    // 최대 사거리 380px 제한
+                    const distToTarget = Math.hypot(rawTargetX - this.x, rawTargetY - this.y);
+                    const blinkDist = Math.min(distToTarget, 380);
+                    const blinkAng = Math.atan2(rawTargetY - this.y, rawTargetX - this.x);
+
+                    const destX = Math.max(FIELD_MIN_X + 30, Math.min(FIELD_MAX_X - 30, this.x + Math.cos(blinkAng) * blinkDist));
+                    const destY = Math.max(FIELD_MIN_Y + 30, Math.min(FIELD_MAX_Y - 30, this.y + Math.sin(blinkAng) * blinkDist));
+
+                    // 순간이동 잔상
+                    for (let p = 0; p < 10; p++) {
+                        particles.push(new Particle(this.x, this.y, (Math.random() - 0.5) * 5, (Math.random() - 0.5) * 5, '#ff5722', 7, 14, 'spark'));
+                    }
+
+                    this.x = destX;
+                    this.y = destY;
+                    this.aimAngle = blinkAng;
+
+                    if (typeof sfx !== 'undefined' && sfx.playQuickAttack) sfx.playQuickAttack();
+
+                    // 전방 85px 내 적 타격 판정
+                    const hitRange = 85;
+                    const hitX = this.x + Math.cos(blinkAng) * 40;
+                    const hitY = this.y + Math.sin(blinkAng) * 40;
+
+                    const targets = [opponent, ...(typeof scytherClones !== 'undefined' ? scytherClones : [])].filter(c => c && c.isAlive && c !== this);
+                    let hitTarget = null;
+                    let minD = 9999;
+                    for (const t of targets) {
+                        const d = Math.hypot(t.x - hitX, t.y - hitY);
+                        if (d <= hitRange + t.radius && d < minD) {
+                            minD = d;
+                            hitTarget = t;
+                        }
+                    }
+
+                    if (hitTarget) {
+                        // 명중!
+                        hitTarget.takeDamage(95, this, true, Math.cos(blinkAng) * 18, Math.sin(blinkAng) * 18);
+                        if (typeof sfx !== 'undefined' && sfx.playHit) sfx.playHit();
+                        triggerScreenShake(10);
+                        addGroundDecal(hitX, hitY, 35, 'crater');
+                        showAlert('💥 무릎차기 적중 (95 DMG)! 💥');
+                        for (let p = 0; p < 16; p++) {
+                            const a = Math.random() * Math.PI * 2;
+                            particles.push(new Particle(hitX, hitY, Math.cos(a) * 6, Math.sin(a) * 6, '#ff9800', 7, 18, 'spark'));
+                        }
+                    } else {
+                        // 빗나감! 바닥에 무릎을 부딪쳐 자신이 피해를 입음 (원작 고증)
+                        this.takeDamage(40, this, false, -Math.cos(blinkAng) * 4, -Math.sin(blinkAng) * 4, true);
+                        this.applyStun(16); // 비틀거림 경직
+                        if (typeof sfx !== 'undefined' && sfx.playBrake) sfx.playBrake();
+                        triggerScreenShake(6);
+                        addGroundDecal(this.x, this.y, 28, 'crater');
+                        showAlert('⚠️ 무릎차기 빗나감! 바닥에 무릎을 부딪쳐 자신이 피해를 입었다! (40 DMG) ⚠️');
+                    }
+
+                } else if (slot === 'e') {
+                    // E: 뛰어오르기 (공중으로 날아가 3초간 몸을 피함, 밑에 파란색 원 생기고 3초 뒤 내려찍으며 낙하 140 에어본)
+                    this.cooldowns.e = this.maxCooldowns.e;
+                    this.state = 'bounce_airborne';
+                    this.bounceState = 'airborne';
+                    this.bounceTimer = 180; // 3초 (60fps * 3 = 180프레임)
+
+                    const aiTarget = (this.isAI && this.aiFocusTarget && this.aiFocusTarget.isAlive) ? this.aiFocusTarget : opponent;
+                    this.bounceTargetX = this.isAI ? aiTarget.x : mouse.x;
+                    this.bounceTargetY = this.isAI ? aiTarget.y : mouse.y;
+                    this.bounceTargetX = Math.max(FIELD_MIN_X + 50, Math.min(FIELD_MAX_X - 50, this.bounceTargetX));
+                    this.bounceTargetY = Math.max(FIELD_MIN_Y + 50, Math.min(FIELD_MAX_Y - 50, this.bounceTargetY));
+
+                    if (typeof sfx !== 'undefined' && sfx.playQuickAttack) sfx.playQuickAttack();
+                    triggerScreenShake(6);
+                    showAlert('☁️ 뛰어오르기! 공중 체공 회피 (3초 후 급강하 강타)! ☁️');
+
+                    // 지면 도약 파티클
+                    for (let p = 0; p < 18; p++) {
+                        const a = Math.random() * Math.PI * 2;
+                        particles.push(new Particle(this.x, this.y, Math.cos(a) * 4, -Math.random() * 6 - 2, '#29b6f6', 6, 20, 'spark'));
+                    }
+
+                } else if (slot === 'r') {
+                    // R: 인파이트 (강력한 펀치 6연타 후 어퍼컷, 그 후 5초간 받는 대미지 1.5배 디버프)
+                    this.cooldowns.r = this.maxCooldowns.r;
+                    this.state = 'close_combat';
+                    this.closeCombatTimer = 38;
+                    this.closeCombatHits = 0;
+
+                    const aiTarget = (this.isAI && this.aiFocusTarget && this.aiFocusTarget.isAlive) ? this.aiFocusTarget : opponent;
+                    this.closeCombatTarget = aiTarget;
+
+                    if (typeof sfx !== 'undefined' && sfx.playBulletPunch) sfx.playBulletPunch();
+                    showAlert('🥊 인파이트 (CLOSE COMBAT) 연격 돌진! 🥊');
+
+                } else if (slot === 'f') {
+                    // F: 플레어드라이브 (몸에 불꽃을 두르고 강하게 돌진, 160 대미지, 자신 45 반동, 상대 7초 화상)
+                    this.cooldowns.f = this.maxCooldowns.f;
+                    this.state = 'flare_blitz';
+                    this.flareBlitzTimer = 34;
+
+                    const aiTarget = (this.isAI && this.aiFocusTarget && this.aiFocusTarget.isAlive) ? this.aiFocusTarget : opponent;
+                    const tx = this.isAI ? aiTarget.x : mouse.x;
+                    const ty = this.isAI ? aiTarget.y : mouse.y;
+                    const ang = Math.atan2(ty - this.y, tx - this.x);
+                    this.aimAngle = ang;
+
+                    const spd = 22.0; // 초고속 화염 돌진
+                    this.flareBlitzVx = Math.cos(ang) * spd;
+                    this.flareBlitzVy = Math.sin(ang) * spd;
+
+                    if (typeof sfx !== 'undefined' && sfx.playExplosion) sfx.playExplosion();
+                    triggerScreenShake(12);
+                    showAlert('🔥 플레어드라이브 (FLARE BLITZ) 전신 화염 돌진! 🔥');
+                }
             } else if (this.species === 'lucario') {
                 // ★ 루카리오 스킬셋 ★
                 const isBuffed = (this.boneRushBuffTimer > 0);
@@ -5223,6 +7107,218 @@
                         showAlert('💥 본러시 바닥 내리치기 강타 성공! (5초간 평타/신속 강화) 💥');
                     }
                 }
+            } else if (this.species === 'blaziken') {
+                if (dist <= 135 && this.cooldowns.r <= 0 && Math.random() < 0.18 * sm) {
+                    this.useSkill('r'); // 인파이트 연격
+                } else if (dist >= 160 && dist <= 380 && this.cooldowns.q <= 0 && Math.random() < 0.12 * sm) {
+                    this.useSkill('q'); // 무릎차기 순간이동 급습
+                } else if (dist >= 250 && dist <= 650 && this.cooldowns.f <= 0 && Math.random() < 0.08 * sm) {
+                    this.useSkill('f'); // 플레어드라이브 화염 돌진
+                } else if (dist >= 220 && dist <= 550 && this.cooldowns.e <= 0 && Math.random() < 0.06 * sm) {
+                    this.useSkill('e'); // 뛰어오르기
+                } else if (dist <= 140 && this.cooldowns.attack <= 0 && Math.random() < 0.16 * sm) {
+                    this.useSkill('attack'); // 블레이즈킥 연타
+                }
+            } else if (this.species === 'onix') {
+                if (slot === 'attack') {
+                    // 평타: 근접 박치기 단일 (목을 당겼다 내려찍는다)
+                    this.cooldowns.attack = this.maxCooldowns.attack;
+                    this.headbuttTimer = 16;
+                    this.attackMotionTimer = 16;
+                    if (typeof sfx !== 'undefined' && sfx.playTackle) sfx.playTackle();
+
+                    setTimeout(() => {
+                        if (!this.isAlive) return;
+                        if (typeof sfx !== 'undefined' && sfx.playRockSmash) sfx.playRockSmash();
+                        triggerScreenShake(5);
+                        const reach = 135;
+                        const hitX = this.x + Math.cos(this.aimAngle) * 65;
+                        const hitY = this.y + Math.sin(this.aimAngle) * 65;
+                        addGroundDecal(hitX, hitY, 32, 'crater');
+
+                        for (let i = 0; i < 12; i++) {
+                            const a = this.aimAngle + (Math.random() - 0.5) * 1.2;
+                            const spd = Math.random() * 6 + 2;
+                            particles.push(new Particle(hitX, hitY, Math.cos(a) * spd, Math.sin(a) * spd, '#8d6e63', Math.random() * 6 + 3, 18));
+                        }
+
+                        const targets = [opponent, ...scytherClones.filter(c => c.owner !== this && c.isAlive)];
+                        let closest = null;
+                        let minD = 99999;
+                        for (const tgt of targets) {
+                            if (!tgt || !tgt.isAlive) continue;
+                            const d = Math.hypot(tgt.x - hitX, tgt.y - hitY);
+                            if (d <= reach && d < minD) {
+                                minD = d;
+                                closest = tgt;
+                            }
+                        }
+                        if (closest) {
+                            const kbX = Math.cos(this.aimAngle) * 14;
+                            const kbY = Math.sin(this.aimAngle) * 14;
+                            closest.takeDamage(58, this, false, kbX, kbY);
+                            if (typeof sfx !== 'undefined' && sfx.playHit) sfx.playHit();
+                        }
+                        if (typeof stoneRocks !== 'undefined') {
+                            for (const rock of stoneRocks) {
+                                if (!rock.isAlive) continue;
+                                const d = Math.hypot(rock.x - hitX, rock.y - hitY);
+                                if (d <= reach + rock.radius) rock.takeDamage(58, this);
+                            }
+                        }
+                    }, 110);
+
+                } else if (slot === 'q') {
+                    // Q: 구멍파기 (전광석화/돌진처럼 타겟 방향으로 자동 고속 돌진, 모습 숨김, 바닥 흙더미 표시, 오직 얼굴 돌에만 대미지)
+                    this.cooldowns.q = this.maxCooldowns.q;
+                    this.state = 'burrowed';
+                    this.burrowTimer = 55; // 약 55프레임 돌진
+                    this.burrowMaxTimer = 55;
+                    this.burrowHitCooldown = 0;
+
+                    // 타겟 방향 계산 (플레이어: 마우스 방향, AI: 상대 방향)
+                    const aiTarget = (this.isAI && this.aiFocusTarget && this.aiFocusTarget.isAlive) ? this.aiFocusTarget : opponent;
+                    const targetX = this.isAI ? aiTarget.x : mouse.x;
+                    const targetY = this.isAI ? aiTarget.y : mouse.y;
+                    const digAngle = Math.atan2(targetY - this.y, targetX - this.x);
+                    this.aimAngle = digAngle;
+
+                    const digSpeed = 15.5; // 전광석화 스타일 고속 돌진 속도
+                    this.burrowVx = Math.cos(digAngle) * digSpeed;
+                    this.burrowVy = Math.sin(digAngle) * digSpeed;
+
+                    if (typeof sfx !== 'undefined' && sfx.playDig) sfx.playDig();
+                    triggerScreenShake(8);
+                    addGroundDecal(this.x, this.y, 50, 'crater');
+                    showAlert('⛏️ 롱스톤 구멍파기 돌진 (DIG DASH)!');
+                    for (let i = 0; i < 20; i++) {
+                        const a = Math.random() * Math.PI * 2;
+                        particles.push(new Particle(this.x, this.y, Math.cos(a) * 5, Math.sin(a) * 5 - 2, '#8d6e63', Math.random() * 7 + 3, 22));
+                    }
+
+                } else if (slot === 'e') {
+                    // E: 지진 2연타 ('탁... 탁!') 및 땅 갈라짐 균열 (구멍파기 상대도 맞고 대미지 2배)
+                    this.cooldowns.e = this.maxCooldowns.e;
+                    this.attackMotionTimer = 18;
+                    this.earthquakeStep = 1;
+                    this.earthquakeStepTimer = 20; // 약 0.33초 뒤 2타 발동
+
+                    if (typeof sfx !== 'undefined' && sfx.playEarthquake) sfx.playEarthquake();
+                    if (typeof sfx !== 'undefined' && sfx.playRockSmash) sfx.playRockSmash();
+                    triggerScreenShake(11);
+
+                    // 1타 발동 ("탁!")
+                    addGroundFissure(this.x, this.y, 280, 5);
+                    showAlert('🌋 지진 1타 강타 (탁!)');
+                    groundEffects.push(new EarthquakeShockwave(this.x, this.y, this, 280, 32, 60));
+
+                } else if (slot === 'r') {
+                    // R: 조이기 (근접 공격 맞춘 상대를 감싼다, 지속피해, QTE 영어 버튼 연타 탈출, 중형 이하만 묶을 수 있음)
+                    this.cooldowns.r = this.maxCooldowns.r;
+                    this.attackMotionTimer = 14;
+                    if (typeof sfx !== 'undefined' && sfx.playBind) sfx.playBind();
+
+                    const reach = 135;
+                    const targets = [opponent, ...scytherClones.filter(c => c.owner !== this && c.isAlive)];
+                    let hitTarget = null;
+                    let minD = 99999;
+                    for (const tgt of targets) {
+                        if (!tgt || !tgt.isAlive) continue;
+                        const d = Math.hypot(tgt.x - this.x, tgt.y - this.y);
+                        if (d <= reach + tgt.radius && d < minD) {
+                            minD = d;
+                            hitTarget = tgt;
+                        }
+                    }
+
+                    if (hitTarget) {
+                        const isLarge = (hitTarget.sizeCategory === 'large' || hitTarget.species === 'onix');
+                        if (isLarge) {
+                            showAlert('⚠️ 롱스톤은 너무 거대하여 조일 수 없습니다!');
+                            hitTarget.takeDamage(35, this, false, Math.cos(this.aimAngle) * 8, Math.sin(this.aimAngle) * 8);
+                            if (typeof sfx !== 'undefined' && sfx.playHit) sfx.playHit();
+                        } else {
+                            this.state = 'binding';
+                            this.boundVictim = hitTarget;
+                            hitTarget.state = 'bound';
+                            hitTarget.boundBy = this;
+                            this.bindTimer = 240;
+
+                            const qteKeys = ['A', 'S', 'D', 'W', 'Q', 'E', 'R', 'F', 'Z', 'X', 'C'];
+                            this.qteKey = qteKeys[Math.floor(Math.random() * qteKeys.length)];
+                            this.qteHitsNeeded = 5;
+                            this.qteHitsCurrent = 0;
+
+                            showAlert(`🐍 조이기 성공! [${hitTarget.name}] 포박!`);
+                            if (typeof sfx !== 'undefined' && sfx.playBind) sfx.playBind();
+                            triggerScreenShake(6);
+                        }
+                    } else {
+                        showAlert('조이기 빗나감!');
+                    }
+
+                } else if (slot === 'f') {
+                    // F: 스톤에지 (타겟 위치에 돌기둥 솟아오름 + 돌들이 날아가 랜덤 위치에 박힘, 길을 막고 공격받으면 파괴, 체력 100, 파괴 시 주변 대미지/밀치기)
+                    this.cooldowns.f = this.maxCooldowns.f;
+                    this.attackMotionTimer = 16;
+                    if (typeof sfx !== 'undefined' && sfx.playRockSmash) sfx.playRockSmash();
+                    triggerScreenShake(12);
+
+                    const aiTarget = (this.isAI && this.aiFocusTarget && this.aiFocusTarget.isAlive) ? this.aiFocusTarget : opponent;
+                    const targetX = this.isAI ? aiTarget.x : mouse.x;
+                    const targetY = this.isAI ? aiTarget.y : mouse.y;
+
+                    addGroundDecal(targetX, targetY, 65, 'crater');
+                    showAlert('🪨 스톤에지 (STONE EDGE)!');
+
+                    const seRadius = 180;
+                    const targets = [opponent, ...scytherClones.filter(c => c.owner !== this && c.isAlive)];
+                    for (const tgt of targets) {
+                        if (!tgt || !tgt.isAlive) continue;
+                        const d = Math.hypot(tgt.x - targetX, tgt.y - targetY);
+                        if (d <= seRadius + tgt.radius) {
+                            const kbAng = Math.atan2(tgt.y - targetY, tgt.x - targetX);
+                            tgt.takeDamage(115, this, true, Math.cos(kbAng) * 16, Math.sin(kbAng) * 16);
+                        }
+                    }
+
+                    for (let i = 0; i < 26; i++) {
+                        const a = Math.random() * Math.PI * 2;
+                        const spd = Math.random() * 8 + 3;
+                        particles.push(new Particle(
+                            targetX + (Math.random() - 0.5) * 60,
+                            targetY + (Math.random() - 0.5) * 60,
+                            Math.cos(a) * spd,
+                            Math.sin(a) * spd - 6,
+                            Math.random() < 0.6 ? '#90a4ae' : '#b0bec5',
+                            Math.random() * 9 + 4,
+                            35,
+                            'spark'
+                        ));
+                    }
+
+                    // 서로 가운데를 향해 사선으로 모여있는 원형 바위 기둥 진형 (5~6개)
+                    const rockCount = 5;
+                    const ringRadius = 72; // 타겟 중심을 둘러싸는 반경
+                    for (let i = 0; i < rockCount; i++) {
+                        const angle = (i / rockCount) * Math.PI * 2;
+                        let rx = targetX + Math.cos(angle) * ringRadius;
+                        let ry = targetY + Math.sin(angle) * ringRadius;
+                        rx = Math.max(FIELD_MIN_X + 45, Math.min(FIELD_MAX_X - 45, rx));
+                        ry = Math.max(FIELD_MIN_Y + 45, Math.min(FIELD_MAX_Y - 45, ry));
+
+                        // 중심을 향해 사선으로 기울어지는 각도 계산
+                        const tiltAngle = Math.atan2(targetY - ry, targetX - rx);
+
+                        setTimeout(() => {
+                            if (typeof stoneRocks !== 'undefined') {
+                                stoneRocks.push(new StoneEdgeRock(rx, ry, this, tiltAngle, 0.4));
+                                addGroundDecal(rx, ry, 36, 'crater');
+                                triggerScreenShake(4.5);
+                            }
+                        }, 100 + i * 60);
+                    }
+                }
             }
         }
 
@@ -5243,12 +7339,27 @@
             damageTexts.push(new DamageText(this.x, this.y - 28, '⚡ 경직!', '#ffd700', true));
         }
 
+        // 번치코 플레어드라이브 등에 의한 화상 (7초간 지속 피해)
+        applyBurn(attacker, duration = 420, dmgPerSec = 12) {
+            this.burnTimer = duration;
+            this.burnAttacker = attacker;
+            this.burnDmg = dmgPerSec;
+            showAlert(`🔥 [${this.name}] 7초간 화상 상태이상 부여!`);
+        }
+
         takeDamage(dmg, attacker, isCrit = false, kbX = 0, kbY = 0, isHazard = false) {
             if (this.invincibleTimer > 0) return;
+
+            // 번치코 인파이트 패널티: 5초간 받는 피해 1.5배
+            if (this.defenseDownTimer > 0) {
+                dmg *= 1.5;
+                damageTexts.push(new DamageText(this.x, this.y - 35, '🛡️❌ 1.5x 피해!', '#ff5252', true));
+            }
+
             this.hp = Math.max(0, this.hp - dmg);
             damageTexts.push(new DamageText(this.x, this.y, `-${Math.round(dmg)}`, isCrit ? '#ff1744' : '#ffeb3b', isCrit));
 
-            // 장판류(불꽃 장판, 씨뿌리기, 오물폭탄) 피해인 경우:
+            // 장판류(불꽃회오리, 씨뿌리기, 오물폭탄) 피해인 경우:
             // 피격 경직(hurt) 및 밀치기(넉백)를 주지 않아 매끄럽게 탈출 가능!
             if (isHazard) {
                 if (this.hp <= 0) {
@@ -5270,18 +7381,25 @@
                 return;
             }
 
-            if (this.stunTimer > 0) {
-                this.state = 'stun';
-            } else if (isCrit || Math.hypot(kbX, kbY) > 10) {
-                this.state = 'knockdown';
-                this.stateTimer = 18;
+            // 롱스톤은 "공격에 의한 넉백을 하지 않고" 슈퍼아머 보유
+            const isHeavy = (this.species === 'onix');
+            if (isHeavy) {
+                triggerScreenShake(3);
+                this.vx = 0;
+                this.vy = 0;
             } else {
-                this.state = 'hurt';
-                this.stateTimer = 8;
+                if (this.stunTimer > 0) {
+                    this.state = 'stun';
+                } else if (isCrit || Math.hypot(kbX, kbY) > 10) {
+                    this.state = 'knockdown';
+                    this.stateTimer = 18;
+                } else {
+                    this.state = 'hurt';
+                    this.stateTimer = 8;
+                }
+                this.vx = kbX;
+                this.vy = kbY;
             }
-
-            this.vx = kbX;
-            this.vy = kbY;
 
             if (this.hp <= 0) {
                 if (this !== p1 && currentDifficulty === 'sandbag') {
@@ -5440,6 +7558,23 @@
                 } else if (this.cooldowns.attack <= 0 && dist <= 165 && Math.random() < 0.12 * sm) {
                     this.useSkill('attack');
                 }
+            } else if (this.species === 'onix') {
+                const oppIsBurrowed = (target.state === 'burrowed');
+                if (oppIsBurrowed && this.cooldowns.e <= 0) {
+                    this.useSkill('e');
+                } else if (dist <= 140 && this.cooldowns.r <= 0 && target.sizeCategory !== 'large' && Math.random() < 0.16 * sm) {
+                    this.useSkill('r');
+                } else if (dist <= 130 && this.cooldowns.attack <= 0 && Math.random() < 0.15 * sm) {
+                    this.useSkill('attack');
+                } else if (dist <= 350 && this.cooldowns.e <= 0 && Math.random() < 0.06 * sm) {
+                    this.useSkill('e');
+                } else if (dist >= 180 && dist <= 700 && this.cooldowns.q <= 0 && Math.random() < 0.05 * sm) {
+                    this.useSkill('q');
+                } else if (dist >= 160 && dist <= 650 && this.cooldowns.f <= 0 && Math.random() < 0.04 * sm) {
+                    this.useSkill('f');
+                } else if (dist <= 150 && this.cooldowns.attack <= 0 && Math.random() < 0.12 * sm) {
+                    this.useSkill('attack');
+                }
             } else {
                 if (dist > 280 && this.cooldowns.r <= 0 && Math.random() < 0.03 * sm) {
                     this.useSkill('r');
@@ -5456,6 +7591,18 @@
         }
 
         draw(ctx) {
+            // [롱스톤 전용 고퀄리티 멀티 세그먼트 암석 뱀 렌더러]
+            if (this.species === 'onix') {
+                this.drawOnixSnake(ctx);
+                return;
+            }
+
+            // [꼬부기 물회오리 / 돌진 시 등껍질 속으로 들어가 회전하는 모션]
+            if (this.species === 'squirtle' && (this.state === 'whirlpool' || this.state === 'charging')) {
+                this.drawSquirtleShellSpin(ctx);
+                return;
+            }
+
             ctx.save();
             ctx.translate(this.x, this.y);
 
@@ -5473,6 +7620,13 @@
                 const lungeProgress = this.attackMotionTimer / 12;
                 drawX += Math.cos(this.aimAngle) * 14 * lungeProgress;
                 drawY += Math.sin(this.aimAngle) * 14 * lungeProgress;
+            }
+
+            if (this.headbuttTimer > 0) {
+                const prog = this.headbuttTimer / 16;
+                const offset = (prog > 0.5) ? -Math.sin((prog - 0.5) * Math.PI * 2) * 24 : Math.sin(prog * Math.PI * 2) * 35;
+                drawX += Math.cos(this.aimAngle) * offset;
+                drawY += Math.sin(this.aimAngle) * offset;
             }
 
             if (this.state === 'hurt') {
@@ -5494,13 +7648,25 @@
             const isPika = (this.species === 'pikachu');
             const isScyther = (this.species === 'scyther');
             const isLucario = (this.species === 'lucario');
-            const fw = isBulba ? 40 : (isScyther ? 40 : 32);
-            const fh = (isBulba || isPika) ? 40 : ((isScyther || isLucario) ? 48 : 32);
-            const maxCols = isBulba ? 6 : 4;
-            const destW = isBulba ? 96 : (isScyther ? 110 : (isLucario ? 92 : 84));
-            const destH = isBulba ? 96 : (isPika ? 105 : (isScyther ? 132 : (isLucario ? 130 : 84)));
+            const isOnix = (this.species === 'onix');
+            const isBlaziken = (this.species === 'blaziken');
+
+            // 번치코 뛰어오르기 공중 체공 중에는 지상 본체를 숨김
+            if (isBlaziken && this.bounceState === 'airborne') {
+                ctx.restore();
+                return;
+            }
+
+            const fw = isBulba ? 40 : (isScyther ? 40 : (isOnix ? 88 : 32));
+            const fh = (isBulba || isPika) ? 40 : ((isScyther || isLucario) ? 48 : (isBlaziken ? 56 : (isOnix ? 112 : 32)));
+            const maxCols = isBulba ? 6 : (isOnix ? 4 : 4);
+            const destW = isBulba ? 96 : (isScyther ? 110 : (isLucario ? 92 : (isBlaziken ? 96 : (isOnix ? 180 : 84))));
+            const destH = isBulba ? 96 : (isPika ? 105 : (isScyther ? 132 : (isLucario ? 130 : (isBlaziken ? 140 : (isOnix ? 230 : 84)))));
             const destOffX = -destW / 2;
-            const destOffY = isBulba ? -50 : (isPika ? -54 : (isScyther ? -64 : (isLucario ? -62 : -46)));
+            let destOffY = isBulba ? -50 : (isPika ? -54 : (isScyther ? -64 : (isLucario ? -62 : (isBlaziken ? -68 : (isOnix ? -110 : -46)))));
+            if (isOnix && this.state === 'burrowed') {
+                destOffY += 80;
+            }
 
             let angle = this.aimAngle;
             if (angle < 0) angle += Math.PI * 2;
@@ -5739,6 +7905,101 @@
                 }
                 ctx.restore();
 
+            } else if (isBlaziken && this.state === 'close_combat') {
+                // ★ 번치코 인파이트(Close Combat) 초고속 불꽃 난타 & 블레이즈 승룡권 어퍼컷 ★
+                const isUppercut = (this.closeCombatTimer <= 10);
+                const punchProgress = (38 - this.closeCombatTimer);
+
+                // 1. 고속 타격 잔상 (애프터이미지 실루엣 2중 렌더링)
+                const afterImageOffset = isUppercut ? -12 : (Math.sin(punchProgress * 2.2) * 16);
+                ctx.save();
+                ctx.translate(drawX + Math.cos(this.aimAngle + 0.3) * afterImageOffset * 0.6, drawY + Math.sin(this.aimAngle + 0.3) * afterImageOffset * 0.6);
+                ctx.globalAlpha = 0.35;
+                if (isSheetReady) {
+                    ctx.drawImage(sheet, col * fw, row * fh, fw, fh, destOffX, destOffY, destW, destH);
+                }
+                ctx.restore();
+
+                ctx.save();
+                ctx.translate(drawX + Math.cos(this.aimAngle - 0.3) * afterImageOffset * 0.6, drawY + Math.sin(this.aimAngle - 0.3) * afterImageOffset * 0.6);
+                ctx.globalAlpha = 0.35;
+                if (isSheetReady) {
+                    ctx.drawImage(sheet, col * fw, row * fh, fw, fh, destOffX, destOffY, destW, destH);
+                }
+                ctx.restore();
+
+                // 2. 본체 타격 렌더링
+                ctx.save();
+                ctx.translate(drawX, drawY);
+                const lungeOffset = isUppercut ? 14 : (Math.sin(punchProgress * 2.0) * 8);
+                ctx.translate(Math.cos(this.aimAngle) * lungeOffset, Math.sin(this.aimAngle) * lungeOffset);
+                ctx.rotate(rot + (isUppercut ? -0.15 : (Math.sin(punchProgress * 1.5) * 0.08)));
+
+                if (isSheetReady) {
+                    ctx.drawImage(sheet, col * fw, row * fh, fw, fh, destOffX, destOffY, destW, destH);
+                } else {
+                    this.drawFallbackPixel(ctx);
+                }
+                ctx.restore();
+
+                // 3. 전방 화염 난타 이펙트 (폭발적인 불꽃 펀치 타격섬광 & 스피드 슬래시)
+                ctx.save();
+                ctx.translate(drawX, drawY);
+                ctx.rotate(this.aimAngle);
+                ctx.globalCompositeOperation = 'lighter';
+
+                if (isUppercut) {
+                    // 피니시: 지면을 가르고 솟구치는 거대 블레이즈 승룡권 화염 기둥
+                    const upProg = Math.min(1, (10 - this.closeCombatTimer) / 10);
+                    const beamGrad = ctx.createLinearGradient(0, 0, 90, -70);
+                    beamGrad.addColorStop(0, 'rgba(255, 23, 68, 0.3)');
+                    beamGrad.addColorStop(0.4, '#ff9100');
+                    beamGrad.addColorStop(0.7, '#ffff00');
+                    beamGrad.addColorStop(1, '#ffffff');
+                    ctx.fillStyle = beamGrad;
+                    ctx.beginPath();
+                    ctx.moveTo(10, 25);
+                    ctx.lineTo(85 * upProg + 10, -55 * upProg);
+                    ctx.lineTo(55 * upProg, -85 * upProg);
+                    ctx.lineTo(-5, -15);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // 거대 승룡 화염 폭발 구체
+                    const burstGrad = ctx.createRadialGradient(50 * upProg, -50 * upProg, 5, 50 * upProg, -50 * upProg, 48);
+                    burstGrad.addColorStop(0, '#ffffff');
+                    burstGrad.addColorStop(0.4, '#ffeb3b');
+                    burstGrad.addColorStop(0.8, 'rgba(255, 87, 34, 0.6)');
+                    burstGrad.addColorStop(1, 'rgba(255, 23, 68, 0)');
+                    ctx.fillStyle = burstGrad;
+                    ctx.beginPath();
+                    ctx.arc(50 * upProg, -50 * upProg, 48, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    // 초고속 양손 펀치 화염 폭발 버스트 6연타
+                    const punchPhase = (punchProgress % 4) / 4;
+                    const fistDistance = 35 + punchPhase * 35;
+                    const fistSpread = (punchProgress % 2 === 0 ? 12 : -12);
+
+                    const fGrad = ctx.createRadialGradient(fistDistance, fistSpread, 2, fistDistance, fistSpread, 28);
+                    fGrad.addColorStop(0, '#ffffff');
+                    fGrad.addColorStop(0.35, '#ffeb3b');
+                    fGrad.addColorStop(0.7, '#ff5722');
+                    fGrad.addColorStop(1, 'rgba(255, 23, 68, 0)');
+                    ctx.fillStyle = fGrad;
+                    ctx.beginPath();
+                    ctx.arc(fistDistance, fistSpread, 28, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 타격 스피드 슬래시 라인
+                    ctx.strokeStyle = '#fff59d';
+                    ctx.lineWidth = 3.5;
+                    ctx.beginPath();
+                    ctx.moveTo(10, fistSpread * 0.5);
+                    ctx.lineTo(fistDistance + 18, fistSpread);
+                    ctx.stroke();
+                }
+                ctx.restore();
             } else {
                 ctx.save();
                 ctx.translate(drawX, drawY);
@@ -5847,6 +8108,25 @@
                 ctx.arc(17, 0, 32, 0, Math.PI * 2);
                 ctx.fill();
 
+                ctx.restore();
+            }
+
+            // 롱스톤에게 조이기를 당하고 있을 때 전용 포켓몬별 감싸기 모션 렌더링
+            if (this.boundBy && this.boundBy.isAlive) {
+                drawBindVictimMotion(ctx, this.boundBy, this);
+            }
+
+            // 롱스톤 구멍파기 중일 때 지면 흙더미/잠복 홀 렌더링
+            if (this.species === 'onix' && this.state === 'burrowed') {
+                ctx.save();
+                ctx.translate(drawX, drawY + 22);
+                ctx.fillStyle = '#3e2723';
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 52, 22, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#8d6e63';
+                ctx.lineWidth = 4;
+                ctx.stroke();
                 ctx.restore();
             }
 
@@ -5963,6 +8243,33 @@
                     ctx.moveTo(18, -12); ctx.lineTo(28, 16);
                     ctx.stroke();
                 }
+            } else if (this.species === 'onix') {
+                // 롱스톤 거대 바위 뱀 폴백 도트 렌더러
+                ctx.fillStyle = '#78909c';
+                ctx.strokeStyle = '#37474f';
+                ctx.lineWidth = 3;
+                for (let i = 5; i >= 0; i--) {
+                    const r = 24 - i * 2.8;
+                    const offX = -Math.cos(this.aimAngle) * (i * 22);
+                    const offY = -Math.sin(this.aimAngle) * (i * 22) - 10;
+                    ctx.beginPath();
+                    ctx.arc(offX, offY, r, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+                ctx.fillStyle = '#90a4ae';
+                ctx.beginPath();
+                ctx.arc(0, -14, 28, 0, Math.PI * 2);
+                ctx.fill(); ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(-10, -32); ctx.lineTo(0, -56); ctx.lineTo(10, -32);
+                ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(-12, -22, 6, 4);
+                ctx.fillRect(6, -22, 6, 4);
+                ctx.fillStyle = '#212121';
+                ctx.fillRect(-10, -21, 3, 3);
+                ctx.fillRect(8, -21, 3, 3);
             }
         }
     }
@@ -6359,14 +8666,16 @@
 
     let p1 = null;
     let p2 = null;
-    const heroList = ['charmander', 'squirtle', 'bulbasaur', 'pikachu', 'scyther', 'lucario'];
+    const heroList = ['charmander', 'squirtle', 'bulbasaur', 'pikachu', 'scyther', 'lucario', 'onix', 'blaziken'];
     const heroKoreanNames = {
         charmander: '파이리',
         squirtle: '꼬부기',
         bulbasaur: '이상해씨',
         pikachu: '피카츄',
         scyther: '스라크',
-        lucario: '루카리오'
+        lucario: '루카리오',
+        onix: '롱스톤',
+        blaziken: '번치코'
     };
     function getPokemonName(species) {
         return heroKoreanNames[species] || species;
@@ -6443,12 +8752,13 @@
         totalBattles: 0,
         // Q-Table for choosing Pokémon against opponent: Q[myHero][oppHero]
         qSelect: {
-            charmander: { charmander: 50, squirtle: 35, bulbasaur: 70, pikachu: 50, scyther: 50, lucario: 50 },
-            squirtle:   { charmander: 70, squirtle: 50, bulbasaur: 35, pikachu: 50, scyther: 50, lucario: 45 },
-            bulbasaur:  { charmander: 35, squirtle: 70, bulbasaur: 50, pikachu: 55, scyther: 40, lucario: 50 },
-            pikachu:    { charmander: 55, squirtle: 65, bulbasaur: 45, pikachu: 50, scyther: 50, lucario: 50 },
-            scyther:    { charmander: 45, squirtle: 55, bulbasaur: 70, pikachu: 50, scyther: 50, lucario: 48 },
-            lucario:    { charmander: 52, squirtle: 55, bulbasaur: 50, pikachu: 50, scyther: 52, lucario: 50 }
+            charmander: { charmander: 50, squirtle: 35, bulbasaur: 70, pikachu: 50, scyther: 50, lucario: 50, onix: 35 },
+            squirtle:   { charmander: 70, squirtle: 50, bulbasaur: 35, pikachu: 50, scyther: 50, lucario: 45, onix: 65 },
+            bulbasaur:  { charmander: 35, squirtle: 70, bulbasaur: 50, pikachu: 55, scyther: 40, lucario: 50, onix: 70 },
+            pikachu:    { charmander: 55, squirtle: 65, bulbasaur: 45, pikachu: 50, scyther: 50, lucario: 50, onix: 25 },
+            scyther:    { charmander: 45, squirtle: 55, bulbasaur: 70, pikachu: 50, scyther: 50, lucario: 48, onix: 40 },
+            lucario:    { charmander: 52, squirtle: 55, bulbasaur: 50, pikachu: 50, scyther: 52, lucario: 50, onix: 65 },
+            onix:       { charmander: 65, squirtle: 35, bulbasaur: 30, pikachu: 75, scyther: 60, lucario: 35, onix: 50 }
         },
         tactics: {
             charmander: { optimalRange: 420, dodgeChance: 0.65 },
@@ -6456,7 +8766,8 @@
             bulbasaur:  { optimalRange: 440, dodgeChance: 0.60 },
             pikachu:    { optimalRange: 300, dodgeChance: 0.85 },
             scyther:    { optimalRange: 140, dodgeChance: 0.90 },
-            lucario:    { optimalRange: 240, dodgeChance: 0.86 }
+            lucario:    { optimalRange: 240, dodgeChance: 0.86 },
+            onix:       { optimalRange: 160, dodgeChance: 0.18 }
         },
         stats: {
             charmander: { picks: 0, wins: 0, scoreSum: 0 },
@@ -6464,7 +8775,8 @@
             bulbasaur:  { picks: 0, wins: 0, scoreSum: 0 },
             pikachu:    { picks: 0, wins: 0, scoreSum: 0 },
             scyther:    { picks: 0, wins: 0, scoreSum: 0 },
-            lucario:    { picks: 0, wins: 0, scoreSum: 0 }
+            lucario:    { picks: 0, wins: 0, scoreSum: 0 },
+            onix:       { picks: 0, wins: 0, scoreSum: 0 }
         },
         initialAvgScore: 0,
         finalAvgScore: 0
@@ -6794,9 +9106,11 @@
             bulbasaur: '씨뿌리기 50% 지속흡혈 & 솔라빔 극딜 완성',
             pikachu: '번개 경직 락다운 + 초고속 백만볼트 무빙 샷',
             scyther: '유턴 히트앤런 & 시저크로스 1초 연속 베기',
-            lucario: '파동탄 유도 저격 & 본러시 순간이동 5초 강화'
+            lucario: '파동탄 유도 저격 & 본러시 순간이동 5초 강화',
+            onix: '슈퍼아머 넉백 무효 & 구멍파기 급습 & 스톤에지 바위 벽',
+            blaziken: '블레이즈킥 연격 & 무릎차기 급습 & 플레어드라이브 돌진'
         };
-        const icons = { charmander: '🔥', squirtle: '💧', bulbasaur: '🌿', pikachu: '⚡', scyther: '⚔️', lucario: '🥋' };
+        const icons = { charmander: '🔥', squirtle: '💧', bulbasaur: '🌿', pikachu: '⚡', scyther: '⚔️', lucario: '🥋', onix: '🪨', blaziken: '🔥' };
 
         tbody.innerHTML = heroList.map(h => {
             const st = aiBrain.stats[h];
@@ -6821,6 +9135,7 @@
         groundEffects.length = 0;
         groundDecals.length = 0;
         scytherClones.length = 0;
+        if (typeof stoneRocks !== 'undefined') stoneRocks.length = 0;
 
         const p1Species = heroList[p1HeroIndex];
         const p1Name = getPokemonName(p1Species);
@@ -6897,17 +9212,18 @@
     function updateHudSkillInfo() {
         if (!p1 || !p2) return;
         // 1P 정보 업데이트
-        const p1Theme = (p1.species === 'charmander') ? '#ff8833' : (p1.species === 'squirtle' ? '#29b6f6' : (p1.species === 'bulbasaur' ? '#00e676' : (p1.species === 'scyther' ? '#76ff03' : (p1.species === 'lucario' ? '#2979ff' : '#ffd700'))));
+        const getSpeciesTheme = (sp) => (sp === 'charmander' ? '#ff8833' : (sp === 'squirtle' ? '#29b6f6' : (sp === 'bulbasaur' ? '#00e676' : (sp === 'scyther' ? '#76ff03' : (sp === 'lucario' ? '#2979ff' : (sp === 'onix' ? '#90a4ae' : '#ffd700'))))));
+        const p1Theme = getSpeciesTheme(p1.species);
         document.getElementById('p1-name').innerText = p1.name;
         document.getElementById('p1-name').style.color = p1Theme;
-        document.getElementById('p1-avatar-img').src = `https://play.pokemonshowdown.com/sprites/dex/${p1.species}.png`;
+        document.getElementById('p1-avatar-img').src = (p1.species === 'onix') ? './onix_icon.png' : ((p1.species === 'blaziken') ? './blaziken_icon.png' : `https://play.pokemonshowdown.com/sprites/dex/${p1.species}.png`);
 
         // 2P 정보 업데이트 (난이도 뱃지 표시)
-        const p2Theme = (p2.species === 'charmander') ? '#ff8833' : (p2.species === 'squirtle' ? '#29b6f6' : (p2.species === 'bulbasaur' ? '#00e676' : (p2.species === 'scyther' ? '#76ff03' : (p2.species === 'lucario' ? '#2979ff' : '#ffd700'))));
+        const p2Theme = getSpeciesTheme(p2.species);
         const cfg = DIFFICULTY_SETTINGS[currentDifficulty] || DIFFICULTY_SETTINGS.hell;
         document.getElementById('p2-name').innerText = `${p2.name} (AI) ${cfg.badge}`;
         document.getElementById('p2-name').style.color = (currentDifficulty === 'hell') ? '#ff1744' : p2Theme;
-        document.getElementById('p2-avatar-img').src = `https://play.pokemonshowdown.com/sprites/dex/${p2.species}.png`;
+        document.getElementById('p2-avatar-img').src = (p2.species === 'onix') ? './onix_icon.png' : ((p2.species === 'blaziken') ? './blaziken_icon.png' : `https://play.pokemonshowdown.com/sprites/dex/${p2.species}.png`);
 
         // 스킬 슬롯 아이콘 & 이름 갱신
         if (p1.species === 'charmander') {
@@ -6916,7 +9232,7 @@
             document.getElementById('icon-q').innerText = '💥';
             document.getElementById('name-q').innerText = '돌진 박치기';
             document.getElementById('icon-e').innerText = '🌋';
-            document.getElementById('name-e').innerText = '불꽃 장판';
+            document.getElementById('name-e').innerText = '불꽃회오리';
             document.getElementById('icon-r').innerText = '🐉';
             document.getElementById('name-r').innerText = '용의 파동';
             document.getElementById('icon-f').innerText = '☄️';
@@ -6978,6 +9294,28 @@
             document.getElementById('name-r').innerText = '뼈다귀부메랑';
             document.getElementById('icon-f').innerText = hasAnchor ? '📍' : '🦴';
             document.getElementById('name-f').innerText = hasAnchor ? '순간이동 강타' : '본러시';
+        } else if (p1.species === 'onix') {
+            document.getElementById('icon-attack').innerText = '🔨';
+            document.getElementById('name-attack').innerText = '박치기';
+            document.getElementById('icon-q').innerText = '⛏️';
+            document.getElementById('name-q').innerText = '구멍파기';
+            document.getElementById('icon-e').innerText = '🌋';
+            document.getElementById('name-e').innerText = '지진';
+            document.getElementById('icon-r').innerText = '🐍';
+            document.getElementById('name-r').innerText = '조이기';
+            document.getElementById('icon-f').innerText = '🪨';
+            document.getElementById('name-f').innerText = '스톤에지';
+        } else if (p1.species === 'blaziken') {
+            document.getElementById('icon-attack').innerText = '🔥';
+            document.getElementById('name-attack').innerText = '블레이즈킥';
+            document.getElementById('icon-q').innerText = '⚡';
+            document.getElementById('name-q').innerText = '무릎차기';
+            document.getElementById('icon-e').innerText = '☁️';
+            document.getElementById('name-e').innerText = '뛰어오르기';
+            document.getElementById('icon-r').innerText = '🥊';
+            document.getElementById('name-r').innerText = '인파이트';
+            document.getElementById('icon-f').innerText = '🔥';
+            document.getElementById('name-f').innerText = '플레어드라이브';
         }
 
         const btnP1 = document.getElementById('btn-switch-char');
@@ -7083,6 +9421,12 @@
 
             const arenaTargets = [p1, p2, ...scytherClones];
 
+            for (let i = stoneRocks.length - 1; i >= 0; i--) {
+                const sr = stoneRocks[i];
+                sr.update();
+                if (!sr.isAlive) stoneRocks.splice(i, 1);
+            }
+
             for (let i = groundEffects.length - 1; i >= 0; i--) {
                 const gf = groundEffects[i];
                 gf.update(arenaTargets);
@@ -7159,6 +9503,49 @@
             }
         }
 
+        // 3.5. 스톤에지 바위 오브젝트 렌더링
+        for (const rock of stoneRocks) rock.draw(ctx);
+
+        // 번치코 뛰어오르기 시 바닥 파란색 원형 낙하 인디케이터 렌더링
+        const fighters = [p1, p2].filter(p => p && p.isAlive && p.species === 'blaziken');
+        for (const f of fighters) {
+            if (f.bounceState === 'airborne' || f.bounceState === 'falling') {
+                const prog = 1 - (f.bounceTimer / 180);
+                const r = 220;
+                ctx.save();
+                ctx.translate(f.bounceTargetX, f.bounceTargetY);
+
+                // 파란색 경고 원 영역
+                ctx.fillStyle = `rgba(33, 150, 243, ${0.18 + Math.sin(f.animTick * 0.15) * 0.08})`;
+                ctx.beginPath();
+                ctx.arc(0, 0, r, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 외곽 파란색 링
+                ctx.strokeStyle = '#00e5ff';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(0, 0, r, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // 차오르는 내부 타이머 링
+                ctx.strokeStyle = '#ff1744';
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.arc(0, 0, r * prog, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // 텍스트 인디케이터
+                ctx.font = 'bold 16px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowColor = '#000000';
+                ctx.shadowBlur = 6;
+                ctx.fillText(`⚡ 낙하 경고! ${(f.bounceTimer / 60).toFixed(1)}s`, 0, -r - 12);
+                ctx.restore();
+            }
+        }
+
         // 4. 캐릭터 및 분신 (Y좌표 정렬)
         const renderList = [p1, p2, ...scytherClones].sort((a, b) => a.y - b.y);
         for (const char of renderList) char.draw(ctx);
@@ -7211,6 +9598,9 @@
 
         // 9. 미니맵 레이더
         drawMiniMap(ctx);
+
+        // 10. 조이기 탈출 QTE 오버레이
+        drawQteHud(ctx);
     }
 
     // 버튼 이벤트 리스너 등록
