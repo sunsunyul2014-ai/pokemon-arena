@@ -7561,12 +7561,6 @@
         }
 
         draw(ctx) {
-            // [롱스톤 전용 고퀄리티 멀티 세그먼트 암석 뱀 렌더러]
-            if (this.species === 'onix') {
-                this.drawOnixSnake(ctx);
-                return;
-            }
-
             // [꼬부기 물회오리 / 돌진 시 등껍질 속으로 들어가 회전하는 모션]
             if (this.species === 'squirtle' && (this.state === 'whirlpool' || this.state === 'charging')) {
                 this.drawSquirtleShellSpin(ctx);
