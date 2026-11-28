@@ -7401,28 +7401,46 @@
             ctx.translate(seg.x, seg.y);
             const r = seg.drawR;
 
-            // 포켓몬 롱스톤 아이콘 색상: 베이지-회갈색 돌구슬
-            // 메인 구슬 (아이콘의 베이지-회갈색)
-            const grad = ctx.createRadialGradient(-r * 0.28, -r * 0.32, r * 0.03, 0, 0, r);
-            grad.addColorStop(0, '#cec9bb');   // 밝은 베이지
-            grad.addColorStop(0.45, '#a8a090'); // 중간 베이지회색
-            grad.addColorStop(1, '#6e6a60');    // 짙은 갈회색
+            // ① 메인 구슬 - 방사형 그라디언트 (실제 Onix 베이지-회갈색)
+            const grad = ctx.createRadialGradient(-r * 0.3, -r * 0.32, r * 0.03, 0, 0, r * 1.05);
+            grad.addColorStop(0,   '#d8d3c6');  // 밝은 베이지 하이라이트
+            grad.addColorStop(0.3, '#b8b2a4');  // 중간 베이지회색
+            grad.addColorStop(0.65,'#9a9488');  // Onix 메인 색
+            grad.addColorStop(1,   '#6a6560');  // 짙은 그림자
             ctx.fillStyle = grad;
-            ctx.strokeStyle = '#5a5648';
-            ctx.lineWidth = 1.8;
+            ctx.strokeStyle = '#5c5750';
+            ctx.lineWidth = 1.6;
             ctx.beginPath();
             ctx.arc(0, 0, r, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
 
-            // 상단 왼쪽 하이라이트
-            const hl = ctx.createRadialGradient(-r * 0.3, -r * 0.32, 0, -r * 0.15, -r * 0.18, r * 0.6);
-            hl.addColorStop(0, 'rgba(255,255,245,0.6)');
-            hl.addColorStop(1, 'rgba(255,255,245,0)');
+            // ② 위쪽 왼쪽 하이라이트 광택
+            const hl = ctx.createRadialGradient(-r * 0.32, -r * 0.35, 0, -r * 0.18, -r * 0.2, r * 0.58);
+            hl.addColorStop(0, 'rgba(255,253,240,0.72)');
+            hl.addColorStop(0.6,'rgba(255,253,240,0.18)');
+            hl.addColorStop(1, 'rgba(255,253,240,0)');
             ctx.fillStyle = hl;
             ctx.beginPath();
             ctx.arc(0, 0, r, 0, Math.PI * 2);
             ctx.fill();
+
+            // ③ 아래쪽 짙은 그림자 하프
+            ctx.fillStyle = 'rgba(0,0,0,0.13)';
+            ctx.beginPath();
+            ctx.arc(0, r * 0.12, r * 0.88, 0.1, Math.PI - 0.1);
+            ctx.closePath();
+            ctx.fill();
+
+            // ④ 돌 질감 — 작은 불규칙 패임 (index 기반 고정 패턴)
+            ctx.strokeStyle = 'rgba(90,85,78,0.38)';
+            ctx.lineWidth = 1.1;
+            const seed = index * 137.5;
+            const cx1 = Math.cos(seed) * r * 0.3;
+            const cy1 = Math.sin(seed) * r * 0.25;
+            ctx.beginPath();
+            ctx.arc(cx1, cy1, r * 0.28, 0, Math.PI * 1.3);
+            ctx.stroke();
 
             ctx.restore();
         }
@@ -7433,64 +7451,113 @@
             ctx.translate(head.x, head.y);
             const r = head.drawR;
 
-            // 포켓몬 롱스톤 아이콘 색상: 베이지-회갈색 큰 머리 돌
-            // 메인 머리 구체
-            const grad = ctx.createRadialGradient(-r * 0.28, -r * 0.35, r * 0.04, 0, 0, r);
-            grad.addColorStop(0, '#d4cfc4');   // 밝은 베이지
-            grad.addColorStop(0.45, '#a8a090'); // 중간 베이지회색
-            grad.addColorStop(1, '#6e6a60');    // 짙은 갈회색
+            // ① 목 연결 두꺼운 베이스 (머리가 몸보다 크게 보이도록)
+            ctx.fillStyle = '#9a9488';
+            ctx.beginPath();
+            ctx.ellipse(0, r * 0.55, r * 0.68, r * 0.38, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // ② 메인 머리 구슬 — 방사형 그라디언트
+            const grad = ctx.createRadialGradient(-r * 0.28, -r * 0.32, r * 0.04, 0, 0, r * 1.05);
+            grad.addColorStop(0,   '#dedad0');  // 밝은 베이지
+            grad.addColorStop(0.28,'#c0bab0');
+            grad.addColorStop(0.6, '#a8a090');  // Onix 메인 색
+            grad.addColorStop(1,   '#6a6560');
             ctx.fillStyle = grad;
-            ctx.strokeStyle = '#5a5648';
-            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = '#5c5750';
+            ctx.lineWidth = 2.2;
             ctx.beginPath();
             ctx.arc(0, 0, r, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
 
-            // 상단 하이라이트
-            const hl = ctx.createRadialGradient(-r * 0.3, -r * 0.35, 0, -r * 0.15, -r * 0.22, r * 0.68);
-            hl.addColorStop(0, 'rgba(255,255,245,0.65)');
-            hl.addColorStop(1, 'rgba(255,255,245,0)');
+            // ③ 하이라이트
+            const hl = ctx.createRadialGradient(-r * 0.3, -r * 0.35, 0, -r * 0.16, -r * 0.22, r * 0.65);
+            hl.addColorStop(0, 'rgba(255,253,240,0.75)');
+            hl.addColorStop(0.55,'rgba(255,253,240,0.18)');
+            hl.addColorStop(1, 'rgba(255,253,240,0)');
             ctx.fillStyle = hl;
             ctx.beginPath();
             ctx.arc(0, 0, r, 0, Math.PI * 2);
             ctx.fill();
 
-            // 머리 위 뿔 (아이콘처럼 짧고 굵은 뿔, 같은 베이지 계열)
-            const hornGrad = ctx.createLinearGradient(0, -r * 0.65, 0, -r * 1.5);
-            hornGrad.addColorStop(0, '#a8a090');
-            hornGrad.addColorStop(1, '#c8c4b8');
+            // ④ 아랫쪽 그림자
+            ctx.fillStyle = 'rgba(0,0,0,0.14)';
+            ctx.beginPath();
+            ctx.arc(0, r * 0.1, r * 0.9, 0.08, Math.PI - 0.08);
+            ctx.closePath();
+            ctx.fill();
+
+            // ⑤ 뿔 (실제 Onix처럼 머리 위에서 약간 뒤쪽으로 솟은 단일 뿔)
+            const hornGrad = ctx.createLinearGradient(-r * 0.14, -r * 0.65, r * 0.08, -r * 1.52);
+            hornGrad.addColorStop(0, '#9a9488');
+            hornGrad.addColorStop(0.5,'#b8b2a4');
+            hornGrad.addColorStop(1, '#d0ccc0');
             ctx.fillStyle = hornGrad;
-            ctx.strokeStyle = '#5a5648';
+            ctx.strokeStyle = '#5c5750';
             ctx.lineWidth = 1.8;
             ctx.beginPath();
-            ctx.moveTo(-r * 0.22, -r * 0.62);
-            ctx.lineTo(0, -r * 1.52);
-            ctx.lineTo(r * 0.22, -r * 0.62);
+            ctx.moveTo(-r * 0.26, -r * 0.6);   // 뿔 왼쪽 베이스
+            ctx.quadraticCurveTo(-r * 0.08, -r * 1.1, 0, -r * 1.56);  // 살짝 곡선진 뿔 끝
+            ctx.quadraticCurveTo(r * 0.14, -r * 1.0, r * 0.2, -r * 0.6);  // 오른쪽
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
+            // 뿔 하이라이트
+            ctx.fillStyle = 'rgba(255,253,240,0.38)';
+            ctx.beginPath();
+            ctx.moveTo(0, -r * 1.56);
+            ctx.quadraticCurveTo(r * 0.14, -r * 1.0, r * 0.2, -r * 0.6);
+            ctx.quadraticCurveTo(r * 0.05, -r * 1.0, 0, -r * 1.56);
+            ctx.fill();
 
-            // 눈 (아이콘의 작은 검은 점)
-            const eyeY = -r * 0.08;
+            // ⑥ 눈썹 능선 (Onix의 약간 찡그린 눈 위 융기)
+            ctx.fillStyle = '#7a7570';
+            ctx.beginPath();
+            ctx.ellipse(-r * 0.32, -r * 0.22, r * 0.22, r * 0.09, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(r * 0.32, -r * 0.22, r * 0.22, r * 0.09, 0.3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // ⑦ 눈 (Onix의 작고 진지한 검은 눈)
+            const eyeY = -r * 0.1;
             const eyeX = r * 0.3;
-            ctx.fillStyle = '#1c1c1c';
+            // 눈 흰자 (약간 넓적)
+            ctx.fillStyle = '#e8e4dc';
             ctx.beginPath();
-            ctx.arc(-eyeX, eyeY, r * 0.14, 0, Math.PI * 2);
+            ctx.ellipse(-eyeX, eyeY, r * 0.14, r * 0.12, 0, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(eyeX, eyeY, r * 0.14, 0, Math.PI * 2);
+            ctx.ellipse(eyeX, eyeY, r * 0.14, r * 0.12, 0, 0, Math.PI * 2);
             ctx.fill();
-            // 눈 흰 반짝임
-            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            // 동공 (검정)
+            ctx.fillStyle = '#1c1a18';
             ctx.beginPath();
-            ctx.arc(-eyeX + r * 0.05, eyeY - r * 0.05, r * 0.055, 0, Math.PI * 2);
+            ctx.arc(-eyeX + r * 0.02, eyeY + r * 0.01, r * 0.09, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(eyeX + r * 0.05, eyeY - r * 0.05, r * 0.055, 0, Math.PI * 2);
+            ctx.arc(eyeX + r * 0.02, eyeY + r * 0.01, r * 0.09, 0, Math.PI * 2);
+            ctx.fill();
+            // 눈 하이라이트
+            ctx.fillStyle = 'rgba(255,255,255,0.88)';
+            ctx.beginPath();
+            ctx.arc(-eyeX + r * 0.07, eyeY - r * 0.05, r * 0.04, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(eyeX + r * 0.07, eyeY - r * 0.05, r * 0.04, 0, Math.PI * 2);
             ctx.fill();
 
-            // 피격 플래시
+            // ⑧ 콧구멍 (Onix 콧구멍 2개)
+            ctx.fillStyle = '#5c5750';
+            ctx.beginPath();
+            ctx.ellipse(-r * 0.14, r * 0.2, r * 0.055, r * 0.04, -0.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(r * 0.14, r * 0.2, r * 0.055, r * 0.04, 0.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // ⑨ 피격 플래시
             if (this.state === 'hurt' || this.stunTimer > 0) {
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
                 ctx.beginPath();
@@ -7561,6 +7628,12 @@
         }
 
         draw(ctx) {
+            // [롱스톤 전용 고퀄리티 멀티 세그먼트 암석 뱀 렌더러]
+            if (this.species === 'onix') {
+                this.drawOnixSnake(ctx);
+                return;
+            }
+
             // [꼬부기 물회오리 / 돌진 시 등껍질 속으로 들어가 회전하는 모션]
             if (this.species === 'squirtle' && (this.state === 'whirlpool' || this.state === 'charging')) {
                 this.drawSquirtleShellSpin(ctx);
